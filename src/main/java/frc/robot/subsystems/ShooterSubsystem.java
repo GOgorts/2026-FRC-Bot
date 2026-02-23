@@ -46,7 +46,6 @@ public class ShooterSubsystem extends SubsystemBase {
         private SparkMax shootingMotor = new SparkMax(shootingMotorCanID, MotorType.kBrushless);
         private SparkMax turretMotor = new SparkMax(turretTurnCanID, MotorType.kBrushless);
         private AbsoluteEncoder turretEncoder;
-        private double pos = 0;
         private double lastPos = 0;
         private double totalRot = 0;
 
@@ -59,6 +58,34 @@ public class ShooterSubsystem extends SubsystemBase {
                 turretMotor.configure(
                                 Configs.ShooterSubsystem.TurretConfig, ResetMode.kResetSafeParameters,
                                 PersistMode.kPersistParameters);
+
+                lastPos = turretEncoder.getPosition();
+        }
+
+        @Override
+        public void periodic() {
+                updateRotation();
+        }
+
+        /** Updates totalRot by accumulating delta from the absolute encoder, handling 0/1 wraparound. */
+        private void updateRotation() {
+                double currentPos = turretEncoder.getPosition(); // 0.0 to 1.0
+                double delta = currentPos - lastPos;
+
+                // Correct for wraparound crossing the 0/1 boundary
+                if (delta > 0.5) {
+                        delta -= 1.0;
+                } else if (delta < -0.5) {
+                        delta += 1.0;
+                }
+
+                totalRot += delta;
+                lastPos = currentPos;
+        }
+
+        /** Returns the total cumulative rotations of the turret since the subsystem was initialized. */
+        public double getRotation() {
+                return totalRot;
         }
 
         private void setShooterPower(double power) {
@@ -69,48 +96,6 @@ public class ShooterSubsystem extends SubsystemBase {
                 turretMotor.set(power);
 
         }
-        // private void safeTurn(double power) {
-
-        // UpdatePos();
-
-        // Stop if exceeding limits
-        // if ((totalRot >= MaxRot && power > 0) ||
-        // (totalRot <= MinRot && power < 0)) {
-
-        // turretMotor.set(0);
-        // } else {
-        // turretMotor.set(power);
-        // }
-        // }
-        /*
-         * private void UpdatePos()
-         * {
-         * 
-         * double currentPos = turretEncoder.getPosition(); // 0 to 1
-         * 
-         * double Change = currentPos - lastPos;
-         * 
-         * // Handle wraparound
-         * // if (Change > 0.5) {
-         * // Change -= 1.0;
-         * // } else if (Change < -0.5) {
-         * // Change += 1.0;
-         * // }
-         * 
-         * totalRot += Change;
-         * lastPos = currentPos;
-         * pos = turretEncoder.getPosition();
-         * if(neg){
-         * totalRot -= pos - lastPos;
-         * }else{
-         * totalRot += pos - lastPos;
-         * }
-         * lastPos = pos;
-         * if(totalRot > 1.5)
-         * return false;
-         * return true;
-         * }
-         */
 
         public Command runShooterCommand() {
                 return new SequentialCommandGroup(

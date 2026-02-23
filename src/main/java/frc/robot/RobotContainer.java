@@ -179,7 +179,7 @@ public class RobotContainer {
         // Right Bumper -> Run hang arm in reverse, set to release when idle
         // m_driverController.rightBumper().whileTrue(m_hangSubsystem.reverseHangCommand());
 
-        // Left Bumper -> Run ball intake
+        // Left Bumper -> Run ball intakeP
         m_driverController.leftBumper().whileTrue(m_IntakeSubsystem.runIntakeCommand());
         // Left Trigger -> Run ball intake reverse
         m_driverController.rightBumper().whileTrue(m_IntakeSubsystem.reverseIntakeCommand());

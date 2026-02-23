@@ -68,7 +68,10 @@ public class ShooterSubsystem extends SubsystemBase {
                 System.out.println("Rotation: " + totalRot);
         }
 
-        /** Updates totalRot by accumulating delta from the absolute encoder, handling 0/1 wraparound. */
+        /**
+         * Updates totalRot by accumulating delta from the absolute encoder, handling
+         * 0/1 wraparound.
+         */
         private void updateRotation() {
                 double currentPos = turretEncoder.getPosition(); // 0.0 to 1.0
                 double delta = currentPos - lastPos;
@@ -84,7 +87,10 @@ public class ShooterSubsystem extends SubsystemBase {
                 lastPos = currentPos;
         }
 
-        /** Returns the total cumulative rotations of the turret since the subsystem was initialized. */
+        /**
+         * Returns the total cumulative rotations of the turret since the subsystem was
+         * initialized.
+         */
         public double getRotation() {
                 return totalRot;
         }
@@ -99,24 +105,17 @@ public class ShooterSubsystem extends SubsystemBase {
         }
 
         public Command runShooterCommand() {
-                return new SequentialCommandGroup(
-                                new WaitCommand(5)
-                                                .andThen(
-                                                                this.startEnd(
-                                                                                () -> this.setShooterPower(
-                                                                                                ShooterSetpoints.kForward),
-                                                                                () -> this.setShooterPower(0.0))));
-                                                                                
+                return this.startEnd(
+                                () -> this.setShooterPower(
+                                                ShooterSetpoints.kForward),
+                                () -> this.setShooterPower(0.0));
+
         }
 
         public Command reverseShooterCommand() {
-                return new SequentialCommandGroup(
-                                new WaitCommand(5)
-                                                .andThen(
-                                                                this.startEnd(
-                                                                                () -> this.setShooterPower(
-                                                                                                ShooterSetpoints.kReverse),
-                                                                                () -> this.setShooterPower(0.0))));
+                return this.startEnd(
+                                () -> this.setShooterPower(ShooterSetpoints.kReverse),
+                                () -> this.setShooterPower(0.0));
         }
 
         public Command posTurretCommand() {

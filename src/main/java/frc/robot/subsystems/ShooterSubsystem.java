@@ -107,12 +107,15 @@ public class ShooterSubsystem extends SubsystemBase {
                                                                                 () -> this.setShooterPower(0.0))));
         }
 
-    public Command reverseShooterCommand() {
-        return new SequentialCommandGroup(
-                new WaitCommand(5)
-        .andThen( this.startEnd(
-                () -> this.setShooterPower(ShooterSetpoints.kReverse), () -> this.setShooterPower(0.0));
-    ))}
+        public Command reverseShooterCommand() {
+                return new SequentialCommandGroup(
+                                new WaitCommand(5)
+                                                .andThen(
+                                                                this.startEnd(
+                                                                                () -> this.setShooterPower(
+                                                                                                ShooterSetpoints.kReverse),
+                                                                                () -> this.setShooterPower(0.0))));
+        }
 
         public Command posTurretCommand() {
                 return this.startEnd(

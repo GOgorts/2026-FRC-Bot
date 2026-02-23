@@ -107,6 +107,7 @@ public final class Configs {
     public static final SparkMaxConfig TurretConfig = new SparkMaxConfig();
     static{
       TurretConfig.inverted(true).idleMode(IdleMode.kBrake).smartCurrentLimit(40);
+      TurretConfig.absoluteEncoder.positionConversionFactor(1.0);
     }
     
     

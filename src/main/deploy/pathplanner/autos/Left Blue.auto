@@ -1,0 +1,37 @@
+{
+  "version": "2025.0",
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Start to Fuel Bay"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Pickup"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Bay to Mid"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Mid to Hang"
+          }
+        }
+      ]
+    }
+  },
+  "resetOdom": true,
+  "folder": "Blue Autos",
+  "choreoAuto": false
+}

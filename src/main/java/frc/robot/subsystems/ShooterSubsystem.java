@@ -65,6 +65,7 @@ public class ShooterSubsystem extends SubsystemBase {
         @Override
         public void periodic() {
                 updateRotation();
+                System.out.println("Rotation: " + totalRot);
         }
 
         /** Updates totalRot by accumulating delta from the absolute encoder, handling 0/1 wraparound. */
@@ -105,6 +106,7 @@ public class ShooterSubsystem extends SubsystemBase {
                                                                                 () -> this.setShooterPower(
                                                                                                 ShooterSetpoints.kForward),
                                                                                 () -> this.setShooterPower(0.0))));
+                                                                                
         }
 
         public Command reverseShooterCommand() {

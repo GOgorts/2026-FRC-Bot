@@ -40,8 +40,8 @@ public class ShooterSubsystem extends SubsystemBase {
 
         private static final int shootingMotorCanID = 15;
         private static final int turretTurnCanID = 16;
-        private static final double MaxRot = 1.5; // 1.5 rotations
-        private static final double MinRot = -1.5;
+        private static final double MaxRot = 2.5;
+        private static final double MinRot = -2.5;
 
         private SparkMax shootingMotor = new SparkMax(shootingMotorCanID, MotorType.kBrushless);
         private SparkMax turretMotor = new SparkMax(turretTurnCanID, MotorType.kBrushless);
@@ -100,8 +100,9 @@ public class ShooterSubsystem extends SubsystemBase {
         }
 
         private void setTurnPower(double power) {
+                if (totalRot >= MaxRot && power > 0) return;
+                if (totalRot <= MinRot && power < 0) return;
                 turretMotor.set(power);
-
         }
 
         public Command runShooterCommand() {

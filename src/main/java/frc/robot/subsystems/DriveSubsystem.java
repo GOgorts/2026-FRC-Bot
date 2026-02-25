@@ -14,12 +14,16 @@ import com.pathplanner.lib.util.swerve.SwerveSetpointGenerator;
 import com.studica.frc.AHRS;
 
 
+import edu.wpi.first.math.Matrix;
+import edu.wpi.first.math.VecBuilder;
+import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.numbers.N1;
+import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
-import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -56,21 +60,30 @@ public class DriveSubsystem extends SubsystemBase {
   // The gyro sensor
   private final AHRS m_gyro = new AHRS(AHRS.NavXComType.kMXP_SPI);
 
-  // Odometry class for tracking robot pose
-  SwerveDriveOdometry m_odometry = new SwerveDriveOdometry(DriveConstants.kDriveKinematics,
+  // Pose estimator fuses wheel odometry + Limelight vision measurements
+  private final SwerveDrivePoseEstimator m_odometry = new SwerveDrivePoseEstimator(
+      DriveConstants.kDriveKinematics,
       Rotation2d.fromDegrees(-1 * m_gyro.getAngle()),
       new SwerveModulePosition[] {
           m_frontLeft.getPosition(),
           m_frontRight.getPosition(),
           m_rearLeft.getPosition(),
-          m_rearRight.getPosition()});
+          m_rearRight.getPosition()},
+      new Pose2d(),
+      // State std devs: trust wheel odometry tightly (x, y, heading)
+      VecBuilder.fill(0.05, 0.05, Math.toRadians(5)),
+      // Vision std devs: trust Limelight loosely — tightened dynamically in periodic()
+      VecBuilder.fill(0.5, 0.5, Math.toRadians(30)));
+
+  private VisionSubsystem m_vision;
 
   // Setpoint generator for PathPlanner
   private final SwerveSetpointGenerator setpointGenerator;
   private SwerveSetpoint previousSetpoint;
 
   /** Creates a new DriveSubsystem. */
-  public DriveSubsystem() {
+  public DriveSubsystem(VisionSubsystem vision) {
+    m_vision = vision;
 
     // Get the robot configuration from PathPlanner's GUI settings
     RobotConfig robotConfig = null;
@@ -125,14 +138,32 @@ public class DriveSubsystem extends SubsystemBase {
 
   @Override
   public void periodic() {
-    // Update the odometry in the periodic block
     m_odometry.update(Rotation2d.fromDegrees(-1 * m_gyro.getAngle()),
         new SwerveModulePosition[] {
           m_frontLeft.getPosition(),
           m_frontRight.getPosition(),
           m_rearLeft.getPosition(),
           m_rearRight.getPosition()});
+
+    // Feed Limelight pose into the estimator when the fix looks reliable
+    if (m_vision != null && m_vision.hasTarget()) {
+      double tagDistance = m_vision.getAverageTagDistance();
+      int tagCount = m_vision.getTagCount();
+
+      // Only accept fixes within 4 meters; require 2+ tags beyond 2 meters
+      if (tagDistance < 4.0 && (tagCount >= 2 || tagDistance < 2.0)) {
+        // Scale trust inversely with distance: tighter std devs when close
+        double xyStdDev = 0.1 * tagDistance;
+        double headingStdDev = Math.toRadians(10 * tagDistance);
+        Matrix<N3, N1> visionStdDevs = VecBuilder.fill(xyStdDev, xyStdDev, headingStdDev);
+
+        m_odometry.addVisionMeasurement(
+            m_vision.getRobotPose(),
+            m_vision.getPoseTimestamp(),
+            visionStdDevs);
+      }
     }
+  }
 
   /**
    * Returns the currently-estimated pose of the robot.
@@ -140,7 +171,7 @@ public class DriveSubsystem extends SubsystemBase {
    * @return The pose.
    */
   public Pose2d getPose() {
-    return m_odometry.getPoseMeters();
+    return m_odometry.getEstimatedPosition();
   }
 
   /**

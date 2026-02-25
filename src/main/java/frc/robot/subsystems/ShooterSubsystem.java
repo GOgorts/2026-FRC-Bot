@@ -65,7 +65,7 @@ public class ShooterSubsystem extends SubsystemBase {
         @Override
         public void periodic() {
                 updateRotation();
-                System.out.println("Rotation: " + totalRot);
+                SmartDashboard.putNumber("Shooter/TotalRot", totalRot);
         }
 
         /**

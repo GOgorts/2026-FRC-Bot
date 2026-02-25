@@ -24,14 +24,20 @@ public class VisionSubsystem extends SubsystemBase {
         kPipeline(0), kOff(1), kBlink(2), kOn(3);
 
         public final int value;
-        LEDMode(int value) { this.value = value; }
+
+        LEDMode(int value) {
+            this.value = value;
+        }
     }
 
     public enum CameraMode {
         kVision(0), kDriver(1);
 
         public final int value;
-        CameraMode(int value) { this.value = value; }
+
+        CameraMode(int value) {
+            this.value = value;
+        }
     }
 
     public VisionSubsystem() {
@@ -44,7 +50,9 @@ public class VisionSubsystem extends SubsystemBase {
     // Target data
     // ---------------------------------------------------------------------------
 
-    /** Returns true when the Limelight has a valid target in the current pipeline. */
+    /**
+     * Returns true when the Limelight has a valid target in the current pipeline.
+     */
     public boolean hasTarget() {
         return m_limelightTable.getEntry("tv").getDouble(0) == 1.0;
     }
@@ -79,11 +87,11 @@ public class VisionSubsystem extends SubsystemBase {
      */
     public Pose2d getRobotPose() {
         double[] pose = getAllianceBotPoseArray();
-        if (pose.length < 6) return new Pose2d();
+        if (pose.length < 6)
+            return new Pose2d();
         return new Pose2d(
-            new Translation2d(pose[0], pose[1]),
-            Rotation2d.fromDegrees(pose[5])
-        );
+                new Translation2d(pose[0], pose[1]),
+                Rotation2d.fromDegrees(pose[5]));
     }
 
     /**
@@ -92,7 +100,8 @@ public class VisionSubsystem extends SubsystemBase {
      */
     public double getPoseTimestamp() {
         double[] pose = getAllianceBotPoseArray();
-        if (pose.length < 7) return 0.0;
+        if (pose.length < 7)
+            return 0.0;
         double latencyMs = pose[6];
         return Timer.getFPGATimestamp() - (latencyMs / 1000.0);
     }
@@ -103,7 +112,8 @@ public class VisionSubsystem extends SubsystemBase {
      */
     public int getTagCount() {
         double[] pose = getAllianceBotPoseArray();
-        if (pose.length < 8) return 0;
+        if (pose.length < 8)
+            return 0;
         return (int) pose[7];
     }
 
@@ -113,7 +123,8 @@ public class VisionSubsystem extends SubsystemBase {
      */
     public double getAverageTagDistance() {
         double[] pose = getAllianceBotPoseArray();
-        if (pose.length < 10) return 0.0;
+        if (pose.length < 10)
+            return 0.0;
         return pose[9];
     }
 

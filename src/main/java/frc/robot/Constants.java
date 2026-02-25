@@ -54,6 +54,15 @@ public final class Constants {
         public static final double kNeg = -0.2;
       }
 
+      public static final class TurretTracking {
+        // Proportional gain: output power per degree of TX error
+        public static final double kP = 0.015;
+        // Turret stops correcting when TX is within this many degrees of center
+        public static final double kDeadband = 2.0;
+        // Maximum output power allowed during vision tracking
+        public static final double kMaxPower = 0.35;
+      }
+
     }
   public static final class HangSubsystemConstants {
     // public static final int kHangMotorCanId = 13;

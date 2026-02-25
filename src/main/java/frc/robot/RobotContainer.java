@@ -76,9 +76,9 @@ public class RobotContainer {
      * The container for the robot. Contains subsystems, OI devices, and commands.
      */
     public RobotContainer() {
-        m_ShooterSubsystem = new ShooterSubsystem();
-        m_TurningSubsystem = new TurningSubsystem();
         m_visionSubsystem = new VisionSubsystem();
+        m_ShooterSubsystem = new ShooterSubsystem(m_visionSubsystem);
+        m_TurningSubsystem = new TurningSubsystem();
         m_robotDrive = new DriveSubsystem(m_visionSubsystem);
         m_IntakeSubsystem = new IntakeSubsystem();
         // m_algaeSubsystem = new AlgaeSubsystem();
@@ -199,6 +199,7 @@ public class RobotContainer {
 
         m_operatorController.rightBumper().whileTrue(m_ShooterSubsystem.posTurretCommand());
         m_operatorController.leftBumper().whileTrue(m_ShooterSubsystem.negTurretCommand());
+        m_operatorController.a().whileTrue(m_ShooterSubsystem.trackTargetCommand());
 
         // m_driverController.rightTrigger().onTrue(m_ShooterSubsystem.runTurningCommand());
         // m_driverController.leftTrigger().onTrue(m_ShooterSubsystem.reverseTurningCommand());

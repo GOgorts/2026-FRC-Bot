@@ -5,12 +5,14 @@ import com.revrobotics.PersistMode;
 import com.revrobotics.ResetMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Configs;
 import frc.robot.Constants.ShooterSubsystemConstants.ShooterSetpoints;
 import frc.robot.Constants.ShooterSubsystemConstants.TurretSetpoints;
+import frc.robot.Constants.ShooterSubsystemConstants.TurretTracking;
 
 public class ShooterSubsystem extends SubsystemBase {
 
@@ -25,7 +27,10 @@ public class ShooterSubsystem extends SubsystemBase {
         private double lastPos = 0;
         private double totalRot = 0;
 
-        public ShooterSubsystem() {
+        private final VisionSubsystem m_vision;
+
+        public ShooterSubsystem(VisionSubsystem vision) {
+                m_vision = vision;
                 turretEncoder = turretMotor.getAbsoluteEncoder();
 
                 shootingMotor.configure(
@@ -42,6 +47,8 @@ public class ShooterSubsystem extends SubsystemBase {
         public void periodic() {
                 updateRotation();
                 SmartDashboard.putNumber("Shooter/TotalRot", totalRot);
+                SmartDashboard.putBoolean("Shooter/HasTarget", m_vision.hasTarget());
+                SmartDashboard.putNumber("Shooter/TargetTX", m_vision.getTX());
         }
 
         /**
@@ -79,6 +86,42 @@ public class ShooterSubsystem extends SubsystemBase {
                 if (totalRot >= MaxRot && power > 0) return;
                 if (totalRot <= MinRot && power < 0) return;
                 turretMotor.set(power);
+        }
+
+        /**
+         * Proportionally drives the turret toward the Limelight's active target.
+         * Call this from a RunCommand or use {@link #trackTargetCommand()}.
+         * Does nothing when no target is visible.
+         */
+        private void moveToTarget() {
+                if (!m_vision.hasTarget()) {
+                        turretMotor.set(0.0);
+                        return;
+                }
+
+                double tx = m_vision.getTX();
+
+                if (Math.abs(tx) < TurretTracking.kDeadband) {
+                        turretMotor.set(0.0);
+                        return;
+                }
+
+                double power = MathUtil.clamp(
+                        tx * TurretTracking.kP,
+                        -TurretTracking.kMaxPower,
+                        TurretTracking.kMaxPower);
+
+                setTurnPower(power);
+        }
+
+        /**
+         * Returns a command that continuously tracks the active Limelight target,
+         * stopping the turret motor when the command ends.
+         */
+        public Command trackTargetCommand() {
+                return this.run(this::moveToTarget)
+                        .finallyDo(() -> turretMotor.set(0.0))
+                        .withName("TrackTarget");
         }
 
         public Command runShooterCommand() {

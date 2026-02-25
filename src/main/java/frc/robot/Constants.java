@@ -145,6 +145,29 @@ public final class Constants {
             kMaxAngularSpeedRadiansPerSecond, kMaxAngularSpeedRadiansPerSecondSquared);
   }
 
+  public static final class VisionConstants {
+    /** NetworkTables name of the Limelight (matches the hostname set in the Limelight web UI). */
+    public static final String kLimelightName = "limelight";
+
+    /** Pipeline index used on startup. */
+    public static final int kDefaultPipeline = 0;
+
+    /**
+     * Maximum average tag distance (meters) below which a pose estimate is
+     * considered trustworthy enough to pass to the pose estimator.
+     */
+    public static final double kMaxTrustableTagDistance = 4.0;
+
+    /**
+     * Standard deviations for vision pose measurements fed to
+     * SwerveDrivePoseEstimator [x (m), y (m), theta (rad)].
+     * Increase these to trust vision less relative to wheel odometry.
+     */
+    public static final double kVisionStdDevX = 0.5;
+    public static final double kVisionStdDevY = 0.5;
+    public static final double kVisionStdDevTheta = 999999; // ignore heading from vision
+  }
+
   public static final class NeoMotorConstants {
     public static final double kFreeSpeedRpm = 5676;
   }

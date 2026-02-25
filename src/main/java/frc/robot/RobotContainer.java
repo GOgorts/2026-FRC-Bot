@@ -36,6 +36,7 @@ import frc.robot.subsystems.IntakeSubsystem;
 import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.subsystems.ShooterSubsystem;
 import frc.robot.subsystems.TurningSubsystem;
+import frc.robot.subsystems.VisionSubsystem;
 import frc.robot.Constants.ShooterSubsystemConstants.ShooterSetpoints;
 
 import static edu.wpi.first.units.Units.Rotation;
@@ -62,6 +63,7 @@ public class RobotContainer {
     // private final HangSubsystem m_hangSubsystem = new HangSubsystem();
     private final ShooterSubsystem m_ShooterSubsystem;
     private final TurningSubsystem m_TurningSubsystem;
+    private final VisionSubsystem m_visionSubsystem;
 
     // The driver's controller
     private CommandXboxController m_driverController;
@@ -78,6 +80,7 @@ public class RobotContainer {
         m_TurningSubsystem = new TurningSubsystem();
         m_robotDrive = new DriveSubsystem();
         m_IntakeSubsystem = new IntakeSubsystem();
+        m_visionSubsystem = new VisionSubsystem();
         // m_algaeSubsystem = new AlgaeSubsystem();
 
         m_driverController = new CommandXboxController(OIConstants.kDriverControllerPort);

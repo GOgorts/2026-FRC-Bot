@@ -36,10 +36,8 @@ import frc.robot.subsystems.IntakeSubsystem;
 import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.subsystems.ShooterSubsystem;
 import frc.robot.subsystems.TurningSubsystem;
+import frc.robot.subsystems.TurretSubsystem;
 import frc.robot.subsystems.VisionSubsystem;
-import frc.robot.Constants.ShooterSubsystemConstants.ShooterSetpoints;
-
-import static edu.wpi.first.units.Units.Rotation;
 
 //import frc.robot.subsystems.HangSubsystem;
 import java.util.List;
@@ -63,6 +61,7 @@ public class RobotContainer {
     // private final HangSubsystem m_hangSubsystem = new HangSubsystem();
     private final ShooterSubsystem m_ShooterSubsystem;
     private final TurningSubsystem m_TurningSubsystem;
+    private final TurretSubsystem m_TurretSubsystem;
     private final VisionSubsystem m_visionSubsystem;
 
     // The driver's controller
@@ -77,8 +76,9 @@ public class RobotContainer {
      */
     public RobotContainer() {
         m_visionSubsystem = new VisionSubsystem();
-        m_ShooterSubsystem = new ShooterSubsystem(m_visionSubsystem);
+        m_ShooterSubsystem = new ShooterSubsystem();
         m_TurningSubsystem = new TurningSubsystem();
+        m_TurretSubsystem = new TurretSubsystem(m_visionSubsystem);
         m_robotDrive = new DriveSubsystem(m_visionSubsystem);
         m_IntakeSubsystem = new IntakeSubsystem();
         // m_algaeSubsystem = new AlgaeSubsystem();
@@ -197,9 +197,9 @@ public class RobotContainer {
                 .whileTrue(m_ShooterSubsystem.reverseShooterCommand()
                         .alongWith(m_TurningSubsystem.reverseTurningCommand()));
 
-        m_operatorController.rightBumper().whileTrue(m_ShooterSubsystem.posTurretCommand());
-        m_operatorController.leftBumper().whileTrue(m_ShooterSubsystem.negTurretCommand());
-        m_operatorController.a().whileTrue(m_ShooterSubsystem.trackTargetCommand());
+        m_operatorController.rightBumper().whileTrue(m_TurretSubsystem.posTurretCommand());
+        m_operatorController.leftBumper().whileTrue(m_TurretSubsystem.negTurretCommand());
+        m_operatorController.a().whileTrue(m_TurretSubsystem.trackTargetCommand());
 
         // m_driverController.rightTrigger().onTrue(m_ShooterSubsystem.runTurningCommand());
         // m_driverController.leftTrigger().onTrue(m_ShooterSubsystem.reverseTurningCommand());

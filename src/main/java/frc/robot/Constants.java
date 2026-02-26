@@ -56,13 +56,13 @@ public final class Constants {
 
       public static final class TurretTracking {
         // Proportional gain: output power per degree of TX error
-        public static final double kP = 0.015;
+        public static final double kP = 0.02;
         // Turret stops correcting when TX is within this many degrees of center
         public static final double kDeadband = 2.0;
         // Maximum output power allowed during vision tracking
-        public static final double kMaxPower = 0.35;
+        public static final double kMaxPower = 0.5;
         // Low-pass filter weight for incoming TX (0 = frozen, 1 = no filtering)
-        public static final double kTXFilterAlpha = 0.25;
+        public static final double kTXFilterAlpha = 1;
         // Seconds to continue tracking on last known TX after losing the target
         public static final double kTargetLostTimeoutSecs = 0.3;
       }
@@ -81,8 +81,8 @@ public final class Constants {
     // Driving Parameters - Note that these are not the maximum capable speeds of
     // the robot, rather the allowed maximum speeds
     // public static final double kMaxSpeedMetersPerSecond = 4.8;
-    public static final double kMaxSpeedMetersPerSecond = 2;
-    public static final double kMaxAngularSpeed = 2 * Math.PI; // radians per second
+    public static final double kMaxSpeedMetersPerSecond = 2.5;
+    public static final double kMaxAngularSpeed = 2.5 * Math.PI; // radians per second
 
     // Chassis configuration
     public static final double kTrackWidth = Units.inchesToMeters(24.5);

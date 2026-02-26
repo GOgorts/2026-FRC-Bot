@@ -93,11 +93,13 @@ public class DriveSubsystem extends SubsystemBase {
       e.printStackTrace();
     }
 
-    // Reset the gyro on a seperate thread after waiting a second for it to calibrate
+    // Zero the yaw on a separate thread after waiting a second for the NavX2 to calibrate.
+    // zeroYaw() is used instead of reset() because reset() triggers a full sensor
+    // recalibration on the NavX2, which takes several seconds and disrupts odometry.
     new Thread(() -> {
       try {
         Thread.sleep(1000);
-        m_gyro.reset();
+        m_gyro.zeroYaw();
       } catch (Exception e) {}
     }).start();
     
@@ -287,7 +289,7 @@ public class DriveSubsystem extends SubsystemBase {
 
   /** Zeroes the heading of the robot. */
   public Command zeroHeadingCommand() {
-    return this.runOnce(() -> m_gyro.reset());
+    return this.runOnce(() -> m_gyro.zeroYaw());
   }
 
   /** Sets the angle to offset the robot */

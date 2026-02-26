@@ -107,7 +107,7 @@ public class ShooterSubsystem extends SubsystemBase {
                 }
 
                 double power = MathUtil.clamp(
-                        tx * TurretTracking.kP,
+                        -tx * TurretTracking.kP,
                         -TurretTracking.kMaxPower,
                         TurretTracking.kMaxPower);
 

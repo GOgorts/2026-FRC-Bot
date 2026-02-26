@@ -156,7 +156,7 @@ public final class Constants {
 
   public static final class VisionConstants {
     /** NetworkTables name of the Limelight (matches the hostname set in the Limelight web UI). */
-    public static final String kLimelightName = "limelight";
+    public static final String kLimelightName = "limelight-turret";
 
     /** Pipeline index used on startup. */
     public static final int kDefaultPipeline = 0;

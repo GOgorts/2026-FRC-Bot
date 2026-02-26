@@ -6,6 +6,7 @@ import com.revrobotics.ResetMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -28,6 +29,8 @@ public class ShooterSubsystem extends SubsystemBase {
         private double totalRot = 0;
 
         private final VisionSubsystem m_vision;
+        private double m_filteredTX = 0.0;
+        private double m_lastTargetSeenTime = 0.0;
 
         public ShooterSubsystem(VisionSubsystem vision) {
                 m_vision = vision;
@@ -49,6 +52,7 @@ public class ShooterSubsystem extends SubsystemBase {
                 SmartDashboard.putNumber("Shooter/TotalRot", totalRot);
                 SmartDashboard.putBoolean("Shooter/HasTarget", m_vision.hasTarget());
                 SmartDashboard.putNumber("Shooter/TargetTX", m_vision.getTX());
+                SmartDashboard.putNumber("Shooter/FilteredTX", m_filteredTX);
         }
 
         /**
@@ -90,24 +94,37 @@ public class ShooterSubsystem extends SubsystemBase {
 
         /**
          * Proportionally drives the turret toward the Limelight's active target.
-         * Call this from a RunCommand or use {@link #trackTargetCommand()}.
-         * Does nothing when no target is visible.
+         *
+         * <p>Two stability techniques are applied:
+         * <ul>
+         *   <li>Exponential moving average smooths noisy TX readings.</li>
+         *   <li>A short timeout keeps the turret moving on the last known TX
+         *       when the target briefly flickers out, preventing start/stop twitching.</li>
+         * </ul>
          */
         private void moveToTarget() {
-                if (!m_vision.hasTarget()) {
+                double now = Timer.getFPGATimestamp();
+
+                if (m_vision.hasTarget()) {
+                        // Blend new reading into the smoothed value
+                        m_filteredTX = TurretTracking.kTXFilterAlpha * m_vision.getTX()
+                                + (1.0 - TurretTracking.kTXFilterAlpha) * m_filteredTX;
+                        m_lastTargetSeenTime = now;
+                } else if (now - m_lastTargetSeenTime > TurretTracking.kTargetLostTimeoutSecs) {
+                        // Target truly gone — stop and let the filter decay toward zero
+                        m_filteredTX = 0.0;
                         turretMotor.set(0.0);
                         return;
                 }
+                // else: target just flickered — continue with the last smoothed TX
 
-                double tx = m_vision.getTX();
-
-                if (Math.abs(tx) < TurretTracking.kDeadband) {
+                if (Math.abs(m_filteredTX) < TurretTracking.kDeadband) {
                         turretMotor.set(0.0);
                         return;
                 }
 
                 double power = MathUtil.clamp(
-                        -tx * TurretTracking.kP,
+                        -m_filteredTX * TurretTracking.kP,
                         -TurretTracking.kMaxPower,
                         TurretTracking.kMaxPower);
 

@@ -61,6 +61,10 @@ public final class Constants {
         public static final double kDeadband = 2.0;
         // Maximum output power allowed during vision tracking
         public static final double kMaxPower = 0.35;
+        // Low-pass filter weight for incoming TX (0 = frozen, 1 = no filtering)
+        public static final double kTXFilterAlpha = 0.25;
+        // Seconds to continue tracking on last known TX after losing the target
+        public static final double kTargetLostTimeoutSecs = 0.3;
       }
 
     }

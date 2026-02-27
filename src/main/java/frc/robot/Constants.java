@@ -55,16 +55,30 @@ public final class Constants {
       }
 
       public static final class TurretTracking {
-        // Proportional gain: output power per degree of TX error
-        public static final double kP = 0.05;
-        // Turret stops correcting when TX is within this many degrees of center
+        // Proportional gain: output power per degree of TX error (vision tracking)
+        public static final double kP = 0.02;
+        // Proportional gain: output power per degree of angle error (pose tracking)
+        public static final double kPoseP = 0.008;
+        // Turret stops correcting when error is within this many degrees
         public static final double kDeadband = 2.0;
-        // Maximum output power allowed during vision tracking
+        // Maximum output power allowed during tracking
         public static final double kMaxPower = 0.5;
         // Low-pass filter weight for incoming TX (0 = frozen, 1 = no filtering)
         public static final double kTXFilterAlpha = 1;
         // Seconds to continue tracking on last known TX after losing the target
         public static final double kTargetLostTimeoutSecs = 0.3;
+
+        // Encoder rotations per one full turret rotation (gear ratio).
+        // To measure: command the turret to rotate exactly 360° and read totalRot.
+        public static final double kEncoderToTurretRatio = 1.0;
+
+        // Hub center positions in WPILib field coordinates (origin = blue alliance corner).
+        // X = distance from blue alliance wall, Y = distance from bottom field border.
+        // Measured from CAD: 181.928" from blue wall, 158.844" from bottom border.
+        public static final Translation2d kBlueHubCenter = new Translation2d(
+            Units.inchesToMeters(181.928), Units.inchesToMeters(158.844));
+        public static final Translation2d kRedHubCenter = new Translation2d(
+            Units.inchesToMeters(651.25 - 181.928), Units.inchesToMeters(158.844));
       }
 
     }
@@ -81,7 +95,7 @@ public final class Constants {
     // Driving Parameters - Note that these are not the maximum capable speeds of
     // the robot, rather the allowed maximum speeds
     // public static final double kMaxSpeedMetersPerSecond = 4.8;
-    public static final double kMaxSpeedMetersPerSecond = 2;
+    public static final double kMaxSpeedMetersPerSecond = 2.5;
     public static final double kMaxAngularSpeed = 2.5 * Math.PI; // radians per second
 
     // Chassis configuration

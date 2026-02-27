@@ -161,7 +161,7 @@ public class VisionSubsystem extends SubsystemBase {
 
     @Override
     public void periodic() {
-        System.out.println("Vision/TX: " + getTX());
+        // System.out.println("Vision/TX: " + getTX());
         SmartDashboard.putBoolean("Vision/HasTarget", hasTarget());
         SmartDashboard.putNumber("Vision/TX", getTX());
         SmartDashboard.putNumber("Vision/TY", getTY());

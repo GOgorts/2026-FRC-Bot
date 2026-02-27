@@ -6,6 +6,10 @@ import com.revrobotics.ResetMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -26,11 +30,13 @@ public class TurretSubsystem extends SubsystemBase {
     private double totalRot = 0;
 
     private final VisionSubsystem m_vision;
+    private final DriveSubsystem m_drive;
     private double m_filteredTX = 0.0;
     private double m_lastTargetSeenTime = 0.0;
 
-    public TurretSubsystem(VisionSubsystem vision) {
+    public TurretSubsystem(VisionSubsystem vision, DriveSubsystem drive) {
         m_vision = vision;
+        m_drive = drive;
         turretEncoder = turretMotor.getAbsoluteEncoder();
 
         turretMotor.configure(
@@ -44,9 +50,19 @@ public class TurretSubsystem extends SubsystemBase {
     public void periodic() {
         updateRotation();
         SmartDashboard.putNumber("Turret/TotalRot", totalRot);
+        SmartDashboard.putNumber("Turret/AngleDeg", getTurretAngleDeg());
         SmartDashboard.putBoolean("Turret/HasTarget", m_vision.hasTarget());
         SmartDashboard.putNumber("Turret/TargetTX", m_vision.getTX());
         SmartDashboard.putNumber("Turret/FilteredTX", m_filteredTX);
+    }
+
+    /**
+     * Returns the turret's current angle in degrees relative to the robot's
+     * forward direction (0° = straight ahead, positive = clockwise when viewed
+     * from above). Requires {@code kEncoderToTurretRatio} to be calibrated.
+     */
+    public double getTurretAngleDeg() {
+        return (totalRot / TurretTracking.kEncoderToTurretRatio) * 360.0;
     }
 
     /**
@@ -122,6 +138,58 @@ public class TurretSubsystem extends SubsystemBase {
         return this.run(this::moveToTarget)
                 .finallyDo(() -> turretMotor.set(0.0))
                 .withName("TrackTarget");
+    }
+
+    /**
+     * Drives the turret toward the active alliance's hub using the robot's
+     * field-relative pose from odometry.
+     *
+     * <p>Steps:
+     * <ol>
+     *   <li>Compute the field-relative angle from the robot to the hub.</li>
+     *   <li>Subtract the robot's heading to get the turret-relative target angle.</li>
+     *   <li>Compare to the turret's current angle and drive proportionally.</li>
+     * </ol>
+     */
+    private void poseTrack() {
+        Pose2d robotPose = m_drive.getPose();
+
+        boolean isRed = DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red;
+        Translation2d hubPos = isRed ? TurretTracking.kRedHubCenter : TurretTracking.kBlueHubCenter;
+
+        double dx = hubPos.getX() - robotPose.getX();
+        double dy = hubPos.getY() - robotPose.getY();
+        double fieldAngleDeg = Math.toDegrees(Math.atan2(dy, dx));
+
+        double robotHeadingDeg = robotPose.getRotation().getDegrees();
+        double desiredAngleDeg = MathUtil.inputModulus(fieldAngleDeg - robotHeadingDeg, -180, 180);
+
+        double error = MathUtil.inputModulus(desiredAngleDeg - getTurretAngleDeg(), -180, 180);
+
+        SmartDashboard.putNumber("Turret/PoseDesiredDeg", desiredAngleDeg);
+        SmartDashboard.putNumber("Turret/PoseErrorDeg", error);
+
+        if (Math.abs(error) < TurretTracking.kDeadband) {
+            turretMotor.set(0.0);
+            return;
+        }
+
+        double power = MathUtil.clamp(
+            error * TurretTracking.kPoseP,
+            -TurretTracking.kMaxPower,
+            TurretTracking.kMaxPower);
+
+        setTurnPower(power);
+    }
+
+    /**
+     * Returns a command that continuously aims the turret at the alliance hub
+     * using the robot's odometry pose. Stops the motor when interrupted.
+     */
+    public Command poseTrackCommand() {
+        return this.run(this::poseTrack)
+            .finallyDo(() -> turretMotor.set(0.0))
+            .withName("PoseTrack");
     }
 
     public Command posTurretCommand() {

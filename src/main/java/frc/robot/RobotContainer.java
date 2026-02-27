@@ -76,10 +76,10 @@ public class RobotContainer {
      */
     public RobotContainer() {
         m_visionSubsystem = new VisionSubsystem();
+        m_robotDrive = new DriveSubsystem(m_visionSubsystem);
         m_ShooterSubsystem = new ShooterSubsystem();
         m_TurningSubsystem = new TurningSubsystem();
-        m_TurretSubsystem = new TurretSubsystem(m_visionSubsystem);
-        m_robotDrive = new DriveSubsystem(m_visionSubsystem);
+        m_TurretSubsystem = new TurretSubsystem(m_visionSubsystem, m_robotDrive);
         m_IntakeSubsystem = new IntakeSubsystem();
         // m_algaeSubsystem = new AlgaeSubsystem();
 

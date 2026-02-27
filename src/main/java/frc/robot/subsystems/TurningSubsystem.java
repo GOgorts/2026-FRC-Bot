@@ -33,38 +33,41 @@ import frc.robot.Constants.SimulationRobotConstants;
 import frc.robot.Constants.ShooterSubsystemConstants.TurningSetpoints;
 
 public class TurningSubsystem extends SubsystemBase {
-    private static final int turningMotorCanID = 20;
+        private static final int turningMotorCanID = 20;
 
-    private SparkMax turningMotor = new SparkMax(turningMotorCanID, MotorType.kBrushless);
+        private SparkMax turningMotor = new SparkMax(turningMotorCanID, MotorType.kBrushless);
 
-    public TurningSubsystem() {
+        public TurningSubsystem() {
 
-        turningMotor.configure(
-                Configs.ShooterSubsystem.turningConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+                turningMotor.configure(
+                                Configs.ShooterSubsystem.turningConfig, ResetMode.kResetSafeParameters,
+                                PersistMode.kPersistParameters);
 
-    }
+        }
 
-    private void setTurningPower(double power) {
-        turningMotor.set(power);
-    }
+        private void setTurningPower(double power) {
+                turningMotor.set(power);
+        }
 
-    public Command runTurningCommand() {
-        return new SequentialCommandGroup(
-                new WaitCommand(1)
-                        .andThen(
-                                this.startEnd(
-                                        () -> this.setTurningPower(TurningSetpoints.kturnForawrd),
-                                        () -> this.setTurningPower(0.0))));
+        public Command runTurningCommand() {
+                return new SequentialCommandGroup(
+                                new WaitCommand(1)
+                                                .andThen(
+                                                                this.startEnd(
+                                                                                () -> this.setTurningPower(
+                                                                                                TurningSetpoints.kturnForawrd),
+                                                                                () -> this.setTurningPower(0.0))));
 
-    }
+        }
 
-    public Command reverseTurningCommand() {
-        return new SequentialCommandGroup(
-                new WaitCommand(1)
-                        .andThen(
-                                this.startEnd(
-                                        () -> this.setTurningPower(TurningSetpoints.ktunReverse),
-                                        () -> this.setTurningPower(0.0))));
+        public Command reverseTurningCommand() {
+                return new SequentialCommandGroup(
+                                new WaitCommand(1)
+                                                .andThen(
+                                                                this.startEnd(
+                                                                                () -> this.setTurningPower(
+                                                                                                TurningSetpoints.ktunReverse),
+                                                                                () -> this.setTurningPower(0.0))));
 
-    }
+        }
 }

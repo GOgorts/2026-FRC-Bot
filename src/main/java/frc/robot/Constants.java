@@ -64,10 +64,10 @@ public final class Constants {
         public static final double[][] kDistancePowerTable = {
           // { distance (m), motor power }
           // TODO: replace with real characterization data
-          { 1.2, 0.54 },
-          { 1.6, 0.58 },
-          { 1.83, 0.58 },
-          { 2.06, 0.80 },
+          { Units.inchesToMeters(120), 0.54 },
+          { Units.inchesToMeters(160), 0.58 },
+          { Units.inchesToMeters(183), 0.58 },
+          { Units.inchesToMeters(206), 0.80 },
         };
       }
 

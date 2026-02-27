@@ -89,8 +89,14 @@ public class TurretSubsystem extends SubsystemBase {
     }
 
     private void setTurnPower(double power) {
-        if (totalRot >= MaxRot && power > 0) return;
-        if (totalRot <= MinRot && power < 0) return;
+        if (totalRot >= MaxRot && power > 0) {
+            turretMotor.set(0.0);
+            return;
+        }
+        if (totalRot <= MinRot && power < 0) {
+            turretMotor.set(0.0);
+            return;
+        }
         turretMotor.set(power);
     }
 

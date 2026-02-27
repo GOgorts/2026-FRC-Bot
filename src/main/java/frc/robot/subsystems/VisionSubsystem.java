@@ -18,7 +18,6 @@ import frc.robot.Constants.VisionConstants;
 public class VisionSubsystem extends SubsystemBase {
 
     private final NetworkTable m_limelightTable;
-    private boolean m_lastAppliedRedAlliance;
 
     public enum LEDMode {
         kPipeline(0), kOff(1), kBlink(2), kOn(3);
@@ -44,8 +43,6 @@ public class VisionSubsystem extends SubsystemBase {
         m_limelightTable = NetworkTableInstance.getDefault().getTable(VisionConstants.kLimelightName);
         setLEDMode(LEDMode.kPipeline);
         setPipeline(VisionConstants.kDefaultPipeline);
-        m_lastAppliedRedAlliance = AllianceHelper.isRedAlliance();
-        applyTrackingTagFilter(m_lastAppliedRedAlliance);
     }
 
     // ---------------------------------------------------------------------------
@@ -164,19 +161,6 @@ public class VisionSubsystem extends SubsystemBase {
         m_limelightTable.getEntry("pipeline").setNumber(pipeline);
     }
 
-    /**
-     * Limits Limelight AprilTag detection to the active alliance hub tags so
-     * tx-based turret tracking does not lock onto the opposite side hub.
-     */
-    private void applyTrackingTagFilter(boolean isRedAlliance) {
-        int[] tagIds = isRedAlliance ? VisionConstants.kRedHubTagIds : VisionConstants.kBlueHubTagIds;
-        double[] filter = new double[tagIds.length];
-        for (int i = 0; i < tagIds.length; i++) {
-            filter[i] = tagIds[i];
-        }
-        m_limelightTable.getEntry("fiducial_id_filters_set").setDoubleArray(filter);
-    }
-
     // ---------------------------------------------------------------------------
     // Helpers
     // ---------------------------------------------------------------------------
@@ -194,12 +178,6 @@ public class VisionSubsystem extends SubsystemBase {
 
     @Override
     public void periodic() {
-        boolean isRedAlliance = AllianceHelper.isRedAlliance();
-        if (isRedAlliance != m_lastAppliedRedAlliance) {
-            m_lastAppliedRedAlliance = isRedAlliance;
-            applyTrackingTagFilter(isRedAlliance);
-        }
-
         // System.out.println("Vision/TX: " + getTX());
         SmartDashboard.putBoolean("Vision/HasTarget", hasTarget());
         SmartDashboard.putNumber("Vision/TX", getTX());

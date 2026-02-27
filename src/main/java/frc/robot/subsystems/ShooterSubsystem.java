@@ -45,6 +45,7 @@ public class ShooterSubsystem extends SubsystemBase {
         @Override
         public void periodic() {
                 SmartDashboard.putNumber("Shooter/DistanceToHub", getDistanceToHub());
+                SmartDashboard.putNumber("Shooter/AutomaticPower", getPowerForDistance(getDistanceToHub()));
         }
 
         /**

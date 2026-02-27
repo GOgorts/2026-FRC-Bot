@@ -87,7 +87,7 @@ public final class Constants {
 
         // Encoder rotations per one full turret rotation (gear ratio).
         // To measure: command the turret to rotate exactly 360° and read totalRot.
-        public static final double kEncoderToTurretRatio = 7.5;
+        public static final double kEncoderToTurretRatio = 8.333;
 
         // Hub center positions in WPILib field coordinates (origin = blue alliance corner).
         // X = distance from blue alliance wall, Y = distance from bottom field border.

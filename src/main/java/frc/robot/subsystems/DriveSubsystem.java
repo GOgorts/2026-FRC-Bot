@@ -60,7 +60,7 @@ public class DriveSubsystem extends SubsystemBase {
           DriveConstants.kBackRightChassisAngularOffset);
 
   // The gyro sensor
-  private final AHRS m_gyro = new AHRS(AHRS.NavXComType.kMXP_SPI);
+  private final AHRS m_gyro = new AHRS(AHRS.NavXComType.kUSB1);
 
   // Pose estimator fuses wheel odometry + Limelight vision measurements
   private final SwerveDrivePoseEstimator m_odometry = new SwerveDrivePoseEstimator(
@@ -98,13 +98,16 @@ public class DriveSubsystem extends SubsystemBase {
       e.printStackTrace();
     }
 
-    // Zero the yaw on a separate thread after waiting a second for the NavX2 to calibrate.
-    // zeroYaw() is used instead of reset() because reset() triggers a full sensor
-    // recalibration on the NavX2, which takes several seconds and disrupts odometry.
+    // Capture startup heading as zero once NavX has had time to settle.
     new Thread(() -> {
       try {
-        Thread.sleep(1000);
-        m_gyro.zeroYaw();
+        int attempts = 0;
+        while (m_gyro.isCalibrating() && attempts < 300) {
+          Thread.sleep(20);
+          attempts++;
+        }
+        Thread.sleep(100);
+        zeroHeadingWithAdjustment();
       } catch (Exception e) {}
     }).start();
     
@@ -159,6 +162,8 @@ public class DriveSubsystem extends SubsystemBase {
     SmartDashboard.putNumber("Drive/PoseX", pose.getX());
     SmartDashboard.putNumber("Drive/PoseY", pose.getY());
     SmartDashboard.putNumber("Drive/RawGyroDeg", -1 * m_gyro.getAngle());
+    SmartDashboard.putBoolean("Drive/GyroConnected", m_gyro.isConnected());
+    SmartDashboard.putBoolean("Drive/GyroCalibrating", m_gyro.isCalibrating());
 
     // Send the robot heading to the Limelight so MegaTag2 can compute
     // accurate poses even from a single tag.
@@ -313,12 +318,23 @@ public class DriveSubsystem extends SubsystemBase {
 
   /** Zeroes the heading of the robot. */
   public Command zeroHeadingCommand() {
-    return this.runOnce(() -> m_gyro.zeroYaw());
+    return this.runOnce(() -> {
+      if (m_gyro.isCalibrating()) {
+        DriverStation.reportWarning("NavX reports calibrating; using software yaw zero", false);
+      }
+      zeroHeadingWithAdjustment();
+    });
   }
 
   /** Sets the angle to offset the robot */
   public Command setAngleOffsetCommand(double offset) {
     return this.runOnce(() -> m_gyro.setAngleAdjustment(offset));
+  }
+
+  private void zeroHeadingWithAdjustment() {
+    // Software yaw zero: avoids firmware zeroYaw() rejection when NavX reports calibration.
+    m_gyro.setAngleAdjustment(0.0);
+    m_gyro.setAngleAdjustment(-m_gyro.getAngle());
   }
   
   /**

@@ -8,6 +8,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean
@@ -40,11 +41,6 @@ public final class Constants {
 
   public static final class ShooterSubsystemConstants{
 
-      public static final class ShooterSetpoints {
-        public static final double kForward = 0.67;
-        public static final double kReverse = -0.67;
-      }
-      
       public static final class TurningSetpoints {
         public static final double kturnForawrd = 0.9;
         public static final double ktunReverse = -0.9;
@@ -58,7 +54,7 @@ public final class Constants {
         // Proportional gain: output power per degree of TX error (vision tracking)
         public static final double kP = 0.02;
         // Proportional gain: output power per degree of angle error (pose tracking)
-        public static final double kPoseP = 0.008;
+        public static final double kPoseP = SmartDashboard.getNumber("Pose Tracking Gain", 0.02);
         // Turret stops correcting when error is within this many degrees
         public static final double kDeadband = 2.0;
         // Maximum output power allowed during tracking

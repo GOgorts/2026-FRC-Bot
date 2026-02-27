@@ -174,6 +174,7 @@ public class TurretSubsystem extends SubsystemBase {
 
         SmartDashboard.putNumber("Turret/PoseDesiredDeg", desiredAngleDeg);
         SmartDashboard.putNumber("Turret/PoseErrorDeg", error);
+        SmartDashboard.putBoolean("Target Lock", Math.abs(error) < TurretTracking.kDeadband);
 
         if (Math.abs(error) < TurretTracking.kDeadband) {
             turretMotor.set(0.0);

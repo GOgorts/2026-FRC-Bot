@@ -41,21 +41,8 @@ public final class Constants {
   public static final class ShooterSubsystemConstants{
 
       public static final class ShooterSetpoints {
-        // Target shooter speed in RPM. Tune this at your shooting distance.
-        public static final double kForwardRPM = 3500;
-        // Reverse is open-loop power (used only for clearing jams).
-        public static final double kReversePower = -0.4;
-        // Shooter is considered at speed when within this many RPM of target.
-        public static final double kAtSpeedToleranceRPM = 100;
-      }
-
-      public static final class ShooterPID {
-        // Feedforward: 1 / NEO free speed RPM. Gets the wheel near target speed.
-        public static final double kFF = 1.0 / 5676.0;
-        // Small P term corrects any remaining steady-state error.
-        public static final double kP = 0.0001;
-        public static final double kI = 0.0;
-        public static final double kD = 0.0;
+        public static final double kForward = 0.67;
+        public static final double kReverse = -0.67;
       }
       
       public static final class TurningSetpoints {
@@ -83,7 +70,7 @@ public final class Constants {
 
         // Encoder rotations per one full turret rotation (gear ratio).
         // To measure: command the turret to rotate exactly 360° and read totalRot.
-        public static final double kEncoderToTurretRatio = 1.0;
+        public static final double kEncoderToTurretRatio = 10.0;
 
         // Hub center positions in WPILib field coordinates (origin = blue alliance corner).
         // X = distance from blue alliance wall, Y = distance from bottom field border.

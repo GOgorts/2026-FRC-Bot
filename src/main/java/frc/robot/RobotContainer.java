@@ -192,8 +192,7 @@ public class RobotContainer {
 
         m_operatorController.rightTrigger(OIConstants.kTriggerButtonThreshold)
                 .whileTrue(m_ShooterSubsystem.runShooterCommand()
-                        .alongWith(Commands.waitUntil(m_ShooterSubsystem::isAtSpeed)
-                                .andThen(m_TurningSubsystem.runTurningCommand())));
+                        .alongWith(m_TurningSubsystem.runTurningCommand()));
         m_operatorController.leftTrigger(OIConstants.kTriggerButtonThreshold)
                 .whileTrue(m_ShooterSubsystem.reverseShooterCommand()
                         .alongWith(m_TurningSubsystem.reverseTurningCommand()));
@@ -201,6 +200,7 @@ public class RobotContainer {
         m_operatorController.rightBumper().whileTrue(m_TurretSubsystem.posTurretCommand());
         m_operatorController.leftBumper().whileTrue(m_TurretSubsystem.negTurretCommand());
         m_operatorController.a().whileTrue(m_TurretSubsystem.trackTargetCommand());
+        m_operatorController.b().whileTrue(m_TurretSubsystem.poseTrackCommand());
 
         // m_driverController.rightTrigger().onTrue(m_ShooterSubsystem.runTurningCommand());
         // m_driverController.leftTrigger().onTrue(m_ShooterSubsystem.reverseTurningCommand());

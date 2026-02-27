@@ -21,8 +21,8 @@ import frc.robot.Constants.ShooterSubsystemConstants.TurretTracking;
 public class TurretSubsystem extends SubsystemBase {
 
     private static final int turretTurnCanID = 16;
-    private static final double MaxRot = 2.5;
-    private static final double MinRot = -2.5;
+    private static final double MaxRot = 2.0;
+    private static final double MinRot = -2.0;
 
     private SparkMax turretMotor = new SparkMax(turretTurnCanID, MotorType.kBrushless);
     private AbsoluteEncoder turretEncoder;

@@ -98,14 +98,7 @@ public final class Configs {
   public static final class ShooterSubsystem{
     public static final SparkMaxConfig ShooterConfig = new SparkMaxConfig();
     static{
-      ShooterConfig.inverted(true).idleMode(IdleMode.kBrake).smartCurrentLimit(40);
-      ShooterConfig.closedLoop
-          .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
-          .pid(Constants.ShooterSubsystemConstants.ShooterPID.kP,
-               Constants.ShooterSubsystemConstants.ShooterPID.kI,
-               Constants.ShooterSubsystemConstants.ShooterPID.kD)
-          .outputRange(-1.0, 1.0)
-          .feedForward.kV(Constants.ShooterSubsystemConstants.ShooterPID.kFF);
+    ShooterConfig.inverted(true).idleMode(IdleMode.kBrake).smartCurrentLimit(40);
     }
     public static final SparkMaxConfig turningConfig = new SparkMaxConfig();
     static{

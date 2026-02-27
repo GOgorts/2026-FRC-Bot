@@ -18,36 +18,30 @@ public final class Configs {
     public static final ClosedLoopConfig DRIV_CLOSED_LOOP_CONFIG = new ClosedLoopConfig();
     static {
       // Use module constants to calculate conversion factors and feed forward gain.
-      double drivingFactor =
-          ModuleConstants.kWheelDiameterMeters * Math.PI / ModuleConstants.kDrivingMotorReduction;
+      double drivingFactor = ModuleConstants.kWheelDiameterMeters * Math.PI / ModuleConstants.kDrivingMotorReduction;
       double turningFactor = 2 * Math.PI;
       double drivingVelocityFeedForward = 1 / ModuleConstants.kDriveWheelFreeSpeedRps;
 
       drivingConfig.idleMode(IdleMode.kCoast).smartCurrentLimit(50);
-      drivingConfig
-          .encoder
+      drivingConfig.encoder
           .positionConversionFactor(drivingFactor) // meters
           .velocityConversionFactor(drivingFactor / 60.0); // meters per second
-      drivingConfig
-          .closedLoop
+      drivingConfig.closedLoop
           .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
           // These are example gains you may need to them for your own robot!
           .pid(0.04, 0, 0)
-          //.velocityFF(drivingVelocityFeedForward)
-          //drivingFF.kVelocity(drivingVelocityFeedForward,0)
-          .outputRange(-1.0, 1.0)
-          .feedForward.kV(drivingVelocityFeedForward);
+          // .velocityFF(drivingVelocityFeedForward)
+          // drivingFF.kVelocity(drivingVelocityFeedForward,0)
+          .outputRange(-1.0, 1.0).feedForward.kV(drivingVelocityFeedForward);
 
       turningConfig.idleMode(IdleMode.kCoast).smartCurrentLimit(20);
-      turningConfig
-          .absoluteEncoder
+      turningConfig.absoluteEncoder
           // Invert the turning encoder, since the output shaft rotates in the opposite
           // direction of the steering motor in the MAXSwerve Module.
           .inverted(true)
           .positionConversionFactor(turningFactor) // radians
           .velocityConversionFactor(turningFactor / 60.0); // radians per second
-      turningConfig
-          .closedLoop
+      turningConfig.closedLoop
           .feedbackSensor(FeedbackSensor.kAbsoluteEncoder)
           // These are example gains you may need to them for your own robot!
           .pid(1, 0, 0)
@@ -61,56 +55,51 @@ public final class Configs {
     }
   }
 
-  public static final class IntakeSubsystem{
+  public static final class IntakeSubsystem {
     public static final SparkFlexConfig IntakeConfig = new SparkFlexConfig();
-    static{
-    IntakeConfig.inverted(true).idleMode(IdleMode.kBrake).smartCurrentLimit(40);
+    static {
+      IntakeConfig.inverted(true).idleMode(IdleMode.kBrake).smartCurrentLimit(40);
     }
     public static final SparkMaxConfig FlipLeaderConfig = new SparkMaxConfig();
     public static final SparkMaxConfig FlipFollowerConfig = new SparkMaxConfig();
 
-  
-    static{
-       FlipLeaderConfig
-        .inverted(false)
-        .idleMode(IdleMode.kBrake)
-        .smartCurrentLimit(40);
+    static {
+      FlipLeaderConfig
+          .inverted(false)
+          .idleMode(IdleMode.kBrake)
+          .smartCurrentLimit(40);
 
-    FlipLeaderConfig.closedLoop
-        .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
-        .pid(0.04, 0, 0)
-        .outputRange(-1, 1);
-        
-    FlipLeaderConfig.closedLoop.maxMotion
-        .cruiseVelocity(3000)
-        .maxAcceleration(4000)
-        .allowedProfileError(0.5);
+      FlipLeaderConfig.closedLoop
+          .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
+          .pid(0.04, 0, 0)
+          .outputRange(-1, 1);
 
-    FlipFollowerConfig
-        .idleMode(IdleMode.kBrake)
-        .smartCurrentLimit(40);
-}
+      FlipLeaderConfig.closedLoop.maxMotion
+          .cruiseVelocity(3000)
+          .maxAcceleration(4000)
+          .allowedProfileError(0.5);
+
+      FlipFollowerConfig
+          .idleMode(IdleMode.kBrake)
+          .smartCurrentLimit(40);
+    }
   }
-  
 
-
-  
-  public static final class ShooterSubsystem{
+  public static final class ShooterSubsystem {
     public static final SparkMaxConfig ShooterConfig = new SparkMaxConfig();
-    static{
-    ShooterConfig.inverted(true).idleMode(IdleMode.kBrake).smartCurrentLimit(40);
+    static {
+      ShooterConfig.inverted(true).idleMode(IdleMode.kBrake).smartCurrentLimit(40);
     }
     public static final SparkMaxConfig turningConfig = new SparkMaxConfig();
-    static{
-       turningConfig.inverted(true).idleMode(IdleMode.kBrake).smartCurrentLimit(40);
+    static {
+      turningConfig.inverted(true).idleMode(IdleMode.kBrake).smartCurrentLimit(40);
     }
     public static final SparkMaxConfig TurretConfig = new SparkMaxConfig();
-    static{
+    static {
       TurretConfig.inverted(true).idleMode(IdleMode.kBrake).smartCurrentLimit(40);
       TurretConfig.absoluteEncoder.positionConversionFactor(1.0);
     }
-    
-    
+
   }
 
   public static final class CoralSubsystem {
@@ -126,15 +115,13 @@ public final class Configs {
        * Configure the closed loop controller. We want to make sure we set the
        * feedback sensor as the primary encoder.
        */
-      armConfig
-          .closedLoop
+      armConfig.closedLoop
           .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
           // Set PID values for position control
           .p(0.01)
-          .outputRange(-1, 1)
-          .maxMotion
+          .outputRange(-1, 1).maxMotion
           // Set MAXMotion parameters for position control
-          .cruiseVelocity(2000)   
+          .cruiseVelocity(2000)
           .maxAcceleration(10000)
           .allowedProfileError(0.25);
 
@@ -142,12 +129,13 @@ public final class Configs {
       elevatorConfig.idleMode(IdleMode.kCoast).smartCurrentLimit(50).voltageCompensation(12);
 
       /*
-       * Configure the reverse limit switch for the elevator. By enabling the limit switch, this
-       * will prevent any actuation of the elevator in the reverse direction if the limit switch is
+       * Configure the reverse limit switch for the elevator. By enabling the limit
+       * switch, this
+       * will prevent any actuation of the elevator in the reverse direction if the
+       * limit switch is
        * pressed.
        */
-      elevatorConfig
-          .limitSwitch
+      elevatorConfig.limitSwitch
           .reverseLimitSwitchTriggerBehavior(null)
           .reverseLimitSwitchType(Type.kNormallyOpen);
 
@@ -155,13 +143,11 @@ public final class Configs {
        * Configure the closed loop controller. We want to make sure we set the
        * feedback sensor as the primary encoder.
        */
-      elevatorConfig
-          .closedLoop
+      elevatorConfig.closedLoop
           .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
           // Set PID values for position control
           .p(0.1)
-          .outputRange(-1, 1)
-          .maxMotion
+          .outputRange(-1, 1).maxMotion
           // Set MAXMotion parameters for position control
           .cruiseVelocity(4200)
           .maxAcceleration(6000)
@@ -184,8 +170,7 @@ public final class Configs {
        * Configure the closed loop controller. We want to make sure we set the
        * feedback sensor as the primary encoder.
        */
-      armConfig
-          .closedLoop
+      armConfig.closedLoop
           .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
           // Set PID values for position control. We don't need to pass a closed
           // loop slot, as it will default to slot 0.
@@ -204,9 +189,8 @@ public final class Configs {
 
       // Configure basic settings of the hang motor
       hangConfig
-        .inverted(false)
-        .idleMode(IdleMode.kBrake);
+          .inverted(false)
+          .idleMode(IdleMode.kBrake);
     }
   }
 }
-

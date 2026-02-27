@@ -13,6 +13,7 @@ import frc.robot.Configs;
 import frc.robot.Constants.AllianceHelper;
 import frc.robot.Constants.ShooterSubsystemConstants;
 import frc.robot.Constants.ShooterSubsystemConstants.TurretTracking;
+import frc.robot.subsystems.DriveSubsystem;
 
 public class ShooterSubsystem extends SubsystemBase {
 
@@ -46,24 +47,31 @@ public class ShooterSubsystem extends SubsystemBase {
                 SmartDashboard.putNumber("Shooter/DistanceToHub", getDistanceToHub());
         }
 
-        /** Returns the robot's current straight-line distance to the alliance hub (meters). */
+        /**
+         * Returns the robot's current straight-line distance to the alliance hub
+         * (meters).
+         */
         public double getDistanceToHub() {
                 Translation2d hubPos = AllianceHelper.isRedAlliance()
-                        ? TurretTracking.kRedHubCenter
-                        : TurretTracking.kBlueHubCenter;
+                                ? TurretTracking.kRedHubCenter
+                                : TurretTracking.kBlueHubCenter;
                 Translation2d robotPos = m_drive.getPose().getTranslation();
                 return robotPos.getDistance(hubPos);
         }
 
         /**
-         * Returns interpolated shooter motor power for a given distance from the hub (meters).
+         * Returns interpolated shooter motor power for a given distance from the hub
+         * (meters).
          * Values outside the table range are clamped to the nearest endpoint.
          */
         public double getPowerForDistance(double distanceMeters) {
                 return kDistanceToPower.get(distanceMeters);
         }
 
-        /** Returns a command that runs the shooter at the interpolated power for the current hub distance. */
+        /**
+         * Returns a command that runs the shooter at the interpolated power for the
+         * current hub distance.
+         */
         public Command runShooterAutomaticCommand() {
                 return this.startEnd(
                                 () -> this.setShooterPower(getPowerForDistance(getDistanceToHub())),
@@ -76,7 +84,8 @@ public class ShooterSubsystem extends SubsystemBase {
 
         public Command runShooterCommand() {
                 return this.startEnd(
-                                () -> this.setShooterPower(SmartDashboard.getNumber(kForwardKey, ShooterSubsystemConstants.kDefaultShooterPower)),
+                                () -> this.setShooterPower(SmartDashboard.getNumber(kForwardKey,
+                                                ShooterSubsystemConstants.kDefaultShooterPower)),
                                 () -> this.setShooterPower(0.0));
         }
 

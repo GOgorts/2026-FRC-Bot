@@ -192,7 +192,8 @@ public class RobotContainer {
 
         m_operatorController.rightTrigger(OIConstants.kTriggerButtonThreshold)
                 .whileTrue(m_ShooterSubsystem.runShooterCommand()
-                        .alongWith(m_TurningSubsystem.runTurningCommand()));
+                        .alongWith(Commands.waitUntil(m_ShooterSubsystem::isAtSpeed)
+                                .andThen(m_TurningSubsystem.runTurningCommand())));
         m_operatorController.leftTrigger(OIConstants.kTriggerButtonThreshold)
                 .whileTrue(m_ShooterSubsystem.reverseShooterCommand()
                         .alongWith(m_TurningSubsystem.reverseTurningCommand()));

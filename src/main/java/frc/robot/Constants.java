@@ -13,96 +13,101 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 /**
- * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean
- * constants. This class should not be used for any other purpose. All constants should be declared
+ * The Constants class provides a convenient place for teams to hold robot-wide
+ * numerical or boolean
+ * constants. This class should not be used for any other purpose. All constants
+ * should be declared
  * globally (i.e. public static). Do not put anything functional in this class.
  *
- * <p>It is advised to statically import this class (or one of its inner classes) wherever the
+ * <p>
+ * It is advised to statically import this class (or one of its inner classes)
+ * wherever the
  * constants are needed, to reduce verbosity.
  */
 public final class Constants {
 
-  
-  public static final class IntakeSubsystemConstants{
-    
+  public static final class IntakeSubsystemConstants {
+
     public static final class IntakeSetpoints {
       public static final double kForward = 0.7;
       public static final double kReverse = -0.7;
       public static final double kHold = 0.25;
     }
 
-  
-      public static final class flipSetpoints {
-      //public static final double kStow = -5;
-      public static final double kUp = -5; //-7 orig
-      public static final double kDown = 0; //-20 orig
+    public static final class flipSetpoints {
+      // public static final double kStow = -5;
+      public static final double kUp = -5; // -7 orig
+      public static final double kDown = 0; // -20 orig
       public static final double kIn = 0.8;
     }
 
   }
 
-  public static final class ShooterSubsystemConstants{
+  public static final class ShooterSubsystemConstants {
 
-      /** Default shooter motor power for manual/forward shooting (0.0 – 1.0). */
-      public static final double kDefaultShooterPower = 0.58;
+    /** Default shooter motor power for manual/forward shooting (0.0 – 1.0). */
+    public static final double kDefaultShooterPower = 0.2;
 
-      public static final class TurningSetpoints {
-        public static final double kturnForawrd = 0.9;
-        public static final double ktunReverse = -0.9;
-      }
-      public static final class TurretSetpoints {
-        public static final double kPos = 0.2;
-        public static final double kNeg = -0.2;
-      }
+    public static final class TurningSetpoints {
+      public static final double kturnForawrd = 0.9;
+      public static final double ktunReverse = -0.9;
+    }
 
-      /**
-       * Distance-to-power lookup table for the shooter.
-       * Each row is { distanceMeters, motorPower (0.0 – 1.0) }.
-       * Add or adjust rows once you have real data.
-       */
-      public static final class ShooterPowerMap {
-        public static final double[][] kDistancePowerTable = {
+    public static final class TurretSetpoints {
+      public static final double kPos = 0.2;
+      public static final double kNeg = -0.2;
+    }
+
+    /**
+     * Distance-to-power lookup table for the shooter.
+     * Each row is { distanceMeters, motorPower (0.0 – 1.0) }.
+     * Add or adjust rows once you have real data.
+     */
+    public static final class ShooterPowerMap {
+      public static final double[][] kDistancePowerTable = {
           // { distance (m), motor power }
           // TODO: replace with real characterization data
           { Units.inchesToMeters(120), 0.54 },
           { Units.inchesToMeters(160), 0.58 },
           { Units.inchesToMeters(183), 0.58 },
           { Units.inchesToMeters(206), 0.80 },
-        };
-      }
-
-      public static final class TurretTracking {
-        // Proportional gain: output power per degree of TX error (vision tracking)
-        public static final double kP = 0.02;
-        // Proportional gain: output power per degree of angle error (pose tracking)
-        public static final double kPoseP = SmartDashboard.getNumber("Pose Tracking Gain", 0.008);
-        // Turret stops correcting when error is within this many degrees
-        public static final double kDeadband = 0.5;
-        // Maximum output power allowed during tracking
-        public static final double kMaxPower = 0.5;
-        // Low-pass filter weight for incoming TX (0 = frozen, 1 = no filtering)
-        public static final double kTXFilterAlpha = 1;
-        // Seconds to continue tracking on last known TX after losing the target
-        public static final double kTargetLostTimeoutSecs = 0.3;
-
-        // Encoder rotations per one full turret rotation (gear ratio).
-        // To measure: command the turret to rotate exactly 360° and read totalRot.
-        public static final double kEncoderToTurretRatio = 8.333;
-
-        // Hub center positions in WPILib field coordinates (origin = blue alliance corner).
-        // X = distance from blue alliance wall, Y = distance from bottom field border.
-        // Measured from PathPlanner field layout.
-        public static final Translation2d kBlueHubCenter = new Translation2d(4.631, 4.041);
-        public static final Translation2d kRedHubCenter = new Translation2d(11.950, 4.050);
-      }
-
+      };
     }
+
+    public static final class TurretTracking {
+      // Proportional gain: output power per degree of TX error (vision tracking)
+      public static final double kP = 0.02;
+      // Proportional gain: output power per degree of angle error (pose tracking)
+      public static final double kPoseP = SmartDashboard.getNumber("Pose Tracking Gain", 0.008);
+      // Turret stops correcting when error is within this many degrees
+      public static final double kDeadband = 0.5;
+      // Maximum output power allowed during tracking
+      public static final double kMaxPower = 0.5;
+      // Low-pass filter weight for incoming TX (0 = frozen, 1 = no filtering)
+      public static final double kTXFilterAlpha = 1;
+      // Seconds to continue tracking on last known TX after losing the target
+      public static final double kTargetLostTimeoutSecs = 0.3;
+
+      // Encoder rotations per one full turret rotation (gear ratio).
+      // To measure: command the turret to rotate exactly 360° and read totalRot.
+      public static final double kEncoderToTurretRatio = 8.333;
+
+      // Hub center positions in WPILib field coordinates (origin = blue alliance
+      // corner).
+      // X = distance from blue alliance wall, Y = distance from bottom field border.
+      // Measured from PathPlanner field layout.
+      public static final Translation2d kBlueHubCenter = new Translation2d(4.631, 4.041);
+      public static final Translation2d kRedHubCenter = new Translation2d(11.950, 4.050);
+    }
+
+  }
+
   public static final class HangSubsystemConstants {
     // public static final int kHangMotorCanId = 13;
 
     public static final double kForward = 0.75;
     public static final double kReverse = -0.7;
-    //public static final double kHold = 0.3;
+    // public static final double kHold = 0.3;
 
   }
 
@@ -118,12 +123,11 @@ public final class Constants {
     // Distance between centers of right and left wheels on robot
     public static final double kWheelBase = Units.inchesToMeters(24.5);
     // Distance between front and back wheels on robot
-    public static final SwerveDriveKinematics kDriveKinematics =
-        new SwerveDriveKinematics(
-            new Translation2d(kWheelBase / 2, kTrackWidth / 2),
-            new Translation2d(kWheelBase / 2, -kTrackWidth / 2),
-            new Translation2d(-kWheelBase / 2, kTrackWidth / 2),
-            new Translation2d(-kWheelBase / 2, -kTrackWidth / 2));
+    public static final SwerveDriveKinematics kDriveKinematics = new SwerveDriveKinematics(
+        new Translation2d(kWheelBase / 2, kTrackWidth / 2),
+        new Translation2d(kWheelBase / 2, -kTrackWidth / 2),
+        new Translation2d(-kWheelBase / 2, kTrackWidth / 2),
+        new Translation2d(-kWheelBase / 2, -kTrackWidth / 2));
 
     // Angular offsets of the modules relative to the chassis in radians
     public static final double kFrontLeftChassisAngularOffset = -Math.PI / 2;
@@ -141,7 +145,6 @@ public final class Constants {
     public static final int kRearLeftTurningCanId = 6;
     public static final int kFrontRightTurningCanId = 4;
     public static final int kRearRightTurningCanId = 8;
-    
 
     public static final boolean kGyroReversed = false;
   }
@@ -158,10 +161,9 @@ public final class Constants {
     public static final double kWheelCircumferenceMeters = kWheelDiameterMeters * Math.PI;
     // 45 teeth on the wheel's bevel gear, 22 teeth on the first-stage spur gear, 15
     // teeth on the bevel pinion
-    public static final double kDrivingMotorReduction =
-        (45.0 * 22) / (kDrivingMotorPinionTeeth * 15);
-    public static final double kDriveWheelFreeSpeedRps =
-        (kDrivingMotorFreeSpeedRps * kWheelCircumferenceMeters) / kDrivingMotorReduction;
+    public static final double kDrivingMotorReduction = (45.0 * 22) / (kDrivingMotorPinionTeeth * 15);
+    public static final double kDriveWheelFreeSpeedRps = (kDrivingMotorFreeSpeedRps * kWheelCircumferenceMeters)
+        / kDrivingMotorReduction;
   }
 
   public static final class OIConstants {
@@ -182,13 +184,15 @@ public final class Constants {
     public static final double kPThetaController = 1;
 
     // Constraint for the motion profiled robot angle controller
-    public static final TrapezoidProfile.Constraints kThetaControllerConstraints =
-        new TrapezoidProfile.Constraints(
-            kMaxAngularSpeedRadiansPerSecond, kMaxAngularSpeedRadiansPerSecondSquared);
+    public static final TrapezoidProfile.Constraints kThetaControllerConstraints = new TrapezoidProfile.Constraints(
+        kMaxAngularSpeedRadiansPerSecond, kMaxAngularSpeedRadiansPerSecondSquared);
   }
 
   public static final class VisionConstants {
-    /** NetworkTables name of the Limelight (matches the hostname set in the Limelight web UI). */
+    /**
+     * NetworkTables name of the Limelight (matches the hostname set in the
+     * Limelight web UI).
+     */
     public static final String kLimelightName = "limelight-turret";
 
     /** Pipeline index used on startup. */
@@ -226,23 +230,27 @@ public final class Constants {
    * (e.g., FMS handshake hasn't completed yet).
    *
    * Dashboard keys (all under "Alliance/"):
-   *   ManualOverrideEnabled  – toggle to true to ignore FMS/DS and use the manual value
-   *   ManualIsRed            – set to true for Red, false for Blue when override is on
-   *   FMSPresent             – (read-only) whether DriverStation.getAlliance() has a value
-   *   CodeIsRed              – (read-only) the alliance the code is actually using
+   * ManualOverrideEnabled – toggle to true to ignore FMS/DS and use the manual
+   * value
+   * ManualIsRed – set to true for Red, false for Blue when override is on
+   * FMSPresent – (read-only) whether DriverStation.getAlliance() has a value
+   * CodeIsRed – (read-only) the alliance the code is actually using
    */
   public static final class AllianceHelper {
     public static final String kOverrideEnabledKey = "Alliance/ManualOverrideEnabled";
-    public static final String kManualIsRedKey     = "Alliance/ManualIsRed";
-    public static final String kFMSPresentKey      = "Alliance/FMSPresent";
-    public static final String kCodeIsRedKey       = "Alliance/CodeIsRed";
+    public static final String kManualIsRedKey = "Alliance/ManualIsRed";
+    public static final String kFMSPresentKey = "Alliance/FMSPresent";
+    public static final String kCodeIsRedKey = "Alliance/CodeIsRed";
 
     static {
       SmartDashboard.putBoolean(kOverrideEnabledKey, false);
       SmartDashboard.putBoolean(kManualIsRedKey, false);
     }
 
-    /** Returns true if the robot is on the Red alliance, using the manual override if enabled. */
+    /**
+     * Returns true if the robot is on the Red alliance, using the manual override
+     * if enabled.
+     */
     public static boolean isRedAlliance() {
       if (SmartDashboard.getBoolean(kOverrideEnabledKey, false)) {
         return SmartDashboard.getBoolean(kManualIsRedKey, false);
@@ -250,7 +258,10 @@ public final class Constants {
       return DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red;
     }
 
-    /** Publishes diagnostic alliance state to SmartDashboard. Call from a periodic method. */
+    /**
+     * Publishes diagnostic alliance state to SmartDashboard. Call from a periodic
+     * method.
+     */
     public static void publishDiagnostics() {
       SmartDashboard.putBoolean(kFMSPresentKey, DriverStation.getAlliance().isPresent());
       SmartDashboard.putBoolean(kCodeIsRedKey, isRedAlliance());
@@ -261,8 +272,7 @@ public final class Constants {
     public static final double kPixelsPerMeter = 20;
 
     public static final double kElevatorGearing = 25; // 25:1
-    public static final double kCarriageMass =
-        4.3 + 3.15 + 0.151; // Kg, arm + elevator stage + chain
+    public static final double kCarriageMass = 4.3 + 3.15 + 0.151; // Kg, arm + elevator stage + chain
     public static final double kElevatorDrumRadius = 0.0328 / 2.0; // m
     public static final double kMinElevatorHeightMeters = 0.922; // m
     public static final double kMaxElevatorHeightMeters = 1.62; // m
@@ -270,10 +280,8 @@ public final class Constants {
     public static final double kArmReduction = 60; // 60:1
     public static final double kArmLength = 0.433; // m
     public static final double kArmMass = 4.3; // Kg
-    public static final double kMinAngleRads =
-        Units.degreesToRadians(-50.1); // -50.1 deg from horiz
-    public static final double kMaxAngleRads =
-        Units.degreesToRadians(40.9 + 180); // 40.9 deg from horiz
+    public static final double kMinAngleRads = Units.degreesToRadians(-50.1); // -50.1 deg from horiz
+    public static final double kMaxAngleRads = Units.degreesToRadians(40.9 + 180); // 40.9 deg from horiz
 
     public static final double kIntakeReduction = 135; // 135:1
     public static final double kIntakeLength = 0.4032262; // m

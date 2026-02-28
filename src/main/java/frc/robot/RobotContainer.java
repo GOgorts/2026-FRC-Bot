@@ -194,7 +194,7 @@ public class RobotContainer {
                 m_driverController.leftTrigger().onTrue(m_IntakeSubsystem.flipDownCommand());
 
                 m_operatorController.rightTrigger(OIConstants.kTriggerButtonThreshold)
-                                .whileTrue(m_ShooterSubsystem.runShooterAutomaticCommand()
+                                .whileTrue(m_ShooterSubsystem.runShooterCommand()
                                                 .alongWith(m_TurningSubsystem.runTurningCommand()));
                 m_operatorController.leftTrigger(OIConstants.kTriggerButtonThreshold)
                                 .whileTrue(m_ShooterSubsystem.reverseShooterCommand()

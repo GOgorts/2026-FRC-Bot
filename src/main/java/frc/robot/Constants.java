@@ -61,8 +61,8 @@ public final class Constants {
       public static final double kHysteresisRpm = 100.0;
 
       public static final class TurningSetpoints {
-        public static final double kturnForawrd = 0.9;
-        public static final double ktunReverse = -0.9;
+        public static final double kturnForward = 0.9;
+        public static final double kturnReverse = -0.9;
       }
       public static final class TurretSetpoints {
         public static final double kPos = 0.2;
@@ -234,6 +234,15 @@ public final class Constants {
 
   public static final class NeoMotorConstants {
     public static final double kFreeSpeedRpm = 5676;
+  }
+
+  public static final class DiagnosticConstants {
+    /**
+     * Default drive wheel speed (RPM) used in per-wheel diagnostic mode.
+     * Adjustable at runtime via SmartDashboard key "Diagnostic/WheelRPM".
+     */
+    public static final double kDefaultDiagnosticWheelRpm = 500.0;
+    public static final String kWheelRpmKey = "Diagnostic/WheelRPM";
   }
 
   /**

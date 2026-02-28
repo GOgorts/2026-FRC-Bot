@@ -22,6 +22,7 @@ public class ShooterSubsystem extends SubsystemBase {
         private static final int shootingMotorCanID = 15;
         private static final String kForwardRpmKey = "Shooter/ForwardRPM";
         private static final String kReverseRpmKey = "Shooter/ReverseRPM";
+        private static final String kManualModeKey = "Shooter/ManualMode";
 
         private final SparkMax shootingMotor = new SparkMax(shootingMotorCanID, MotorType.kBrushless);
         private final RelativeEncoder shootingEncoder = shootingMotor.getEncoder();
@@ -46,6 +47,7 @@ public class ShooterSubsystem extends SubsystemBase {
 
                 SmartDashboard.putNumber(kForwardRpmKey, ShooterSubsystemConstants.kDefaultShooterRpm);
                 SmartDashboard.putNumber(kReverseRpmKey, ShooterSubsystemConstants.kDefaultReverseShooterRpm);
+                SmartDashboard.putBoolean(kManualModeKey, false);
         }
 
         @Override
@@ -97,14 +99,25 @@ public class ShooterSubsystem extends SubsystemBase {
                 return kDistanceToRpm.get(distanceMeters);
         }
 
+        /** Returns true when manual mode is enabled via the dashboard toggle. */
+        public boolean isManualMode() {
+                return SmartDashboard.getBoolean(kManualModeKey, false);
+        }
+
         /**
-         * Returns a command that continuously updates the shooter to the interpolated
-         * RPM for the live hub distance. Updating every cycle lets isShooterReady()
-         * track the actual target rather than a stale snapshot.
+         * Returns a command that spins up the shooter using either the distance-interpolated
+         * RPM (automatic) or the manual ForwardRPM value from the dashboard, depending on
+         * the Shooter/ManualMode toggle. Updating every cycle lets isShooterReady() track
+         * the actual target rather than a stale snapshot.
          */
         public Command runShooterAutomaticCommand() {
-                return this.run(() -> this.setShooterRpm(getRpmForDistance(getDistanceToHub())))
-                                .finallyDo(() -> this.setShooterRpm(0.0));
+                return this.run(() -> {
+                        double rpm = isManualMode()
+                                        ? SmartDashboard.getNumber(kForwardRpmKey,
+                                                        ShooterSubsystemConstants.kDefaultShooterRpm)
+                                        : getRpmForDistance(getDistanceToHub());
+                        this.setShooterRpm(rpm);
+                }).finallyDo(() -> this.setShooterRpm(0.0));
         }
 
         private void setShooterRpm(double rpm) {

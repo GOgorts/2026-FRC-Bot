@@ -13,6 +13,7 @@ import com.pathplanner.lib.util.swerve.SwerveSetpoint;
 import com.pathplanner.lib.util.swerve.SwerveSetpointGenerator;
 import com.studica.frc.AHRS;
 
+
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
@@ -34,25 +35,29 @@ import frc.robot.Constants.DriveConstants;
 
 public class DriveSubsystem extends SubsystemBase {
   // Create MAXSwerveModules
-  private final MAXSwerveModule m_frontLeft = new MAXSwerveModule(
-      DriveConstants.kFrontLeftDrivingCanId,
-      DriveConstants.kFrontLeftTurningCanId,
-      DriveConstants.kFrontLeftChassisAngularOffset);
+  private final MAXSwerveModule m_frontLeft =
+      new MAXSwerveModule(
+          DriveConstants.kFrontLeftDrivingCanId,
+          DriveConstants.kFrontLeftTurningCanId,
+          DriveConstants.kFrontLeftChassisAngularOffset);
 
-  private final MAXSwerveModule m_frontRight = new MAXSwerveModule(
-      DriveConstants.kFrontRightDrivingCanId,
-      DriveConstants.kFrontRightTurningCanId,
-      DriveConstants.kFrontRightChassisAngularOffset);
+  private final MAXSwerveModule m_frontRight =
+      new MAXSwerveModule(
+          DriveConstants.kFrontRightDrivingCanId,
+          DriveConstants.kFrontRightTurningCanId,
+          DriveConstants.kFrontRightChassisAngularOffset);
 
-  private final MAXSwerveModule m_rearLeft = new MAXSwerveModule(
-      DriveConstants.kRearLeftDrivingCanId,
-      DriveConstants.kRearLeftTurningCanId,
-      DriveConstants.kBackLeftChassisAngularOffset);
+  private final MAXSwerveModule m_rearLeft =
+      new MAXSwerveModule(
+          DriveConstants.kRearLeftDrivingCanId,
+          DriveConstants.kRearLeftTurningCanId,
+          DriveConstants.kBackLeftChassisAngularOffset);
 
-  private final MAXSwerveModule m_rearRight = new MAXSwerveModule(
-      DriveConstants.kRearRightDrivingCanId,
-      DriveConstants.kRearRightTurningCanId,
-      DriveConstants.kBackRightChassisAngularOffset);
+  private final MAXSwerveModule m_rearRight =
+      new MAXSwerveModule(
+          DriveConstants.kRearRightDrivingCanId,
+          DriveConstants.kRearRightTurningCanId,
+          DriveConstants.kBackRightChassisAngularOffset);
 
   // The gyro sensor
   private final AHRS m_gyro = new AHRS(AHRS.NavXComType.kUSB1);
@@ -65,12 +70,11 @@ public class DriveSubsystem extends SubsystemBase {
           m_frontLeft.getPosition(),
           m_frontRight.getPosition(),
           m_rearLeft.getPosition(),
-          m_rearRight.getPosition() },
+          m_rearRight.getPosition()},
       new Pose2d(),
       // State std devs: trust wheel odometry tightly (x, y, heading)
       VecBuilder.fill(0.05, 0.05, Math.toRadians(5)),
-      // Vision std devs: trust Limelight loosely — tightened dynamically in
-      // periodic()
+      // Vision std devs: trust Limelight loosely — tightened dynamically in periodic()
       VecBuilder.fill(0.5, 0.5, Math.toRadians(30)));
 
   private VisionSubsystem m_vision;
@@ -104,57 +108,52 @@ public class DriveSubsystem extends SubsystemBase {
         }
         Thread.sleep(100);
         zeroHeadingWithAdjustment();
-      } catch (Exception e) {
-      }
+      } catch (Exception e) {}
     }).start();
-
-    /*
-     * Auto Builder & Path Planner Configuration
+    
+    /* 
+     *    Auto Builder & Path Planner Configuration
      */
     AutoBuilder.configure(this::getPose, this::resetOdometry, this::getRobotRelativeSpeeds,
-        (speeds, feedforwards) -> drive(speeds),
-        new PPHolonomicDriveController(
-            new PIDConstants(AutoConstants.kPXController, 0, 0),
-            new PIDConstants(AutoConstants.kPThetaController, 0, 0)),
-        robotConfig, () -> {
-          // Boolean supplier that controls when the path will be mirrored for the red
-          // alliance
-          // This will flip the path being followed to the red side of the field.
-          // THE ORIGIN WILL REMAIN ON THE BLUE SIDE
+      (speeds, feedforwards) -> drive(speeds), 
+      new PPHolonomicDriveController(
+      new PIDConstants(AutoConstants.kPXController, 0, 0), 
+      new PIDConstants(AutoConstants.kPThetaController, 0, 0)), 
+      robotConfig,  () -> {
+        // Boolean supplier that controls when the path will be mirrored for the red alliance
+        // This will flip the path being followed to the red side of the field.
+        // THE ORIGIN WILL REMAIN ON THE BLUE SIDE
 
-          var alliance = DriverStation.getAlliance();
-          if (alliance.isPresent()) {
-            return alliance.get() == DriverStation.Alliance.Red;
-            // return false;
-          }
+        var alliance = DriverStation.getAlliance();
+        if (alliance.isPresent()) {
+          return alliance.get() == DriverStation.Alliance.Red;
+          // return false;
+        }
           return false;
           // return false;
-        },
-        this);
+      }, 
+      this);
 
     // Set up for being able to drive using robot-relative ChassisSpeeds
     setpointGenerator = new SwerveSetpointGenerator(
-        robotConfig, // The robot configuration. This is the same config used for generating
-                     // trajectories and running path following commands.
-        DriveConstants.kMaxAngularSpeed // The max rotation velocity of a swerve module in radians per second.
-    );
+      robotConfig, // The robot configuration. This is the same config used for generating trajectories and running path following commands.
+      DriveConstants.kMaxAngularSpeed // The max rotation velocity of a swerve module in radians per second.
+      );
 
-    // Initialize the previous setpoint to the robot's current speeds & module
-    // states
+    // Initialize the previous setpoint to the robot's current speeds & module states
     ChassisSpeeds currentSpeeds = getRobotRelativeSpeeds(); // Method to get current robot-relative chassis speeds
     SwerveModuleState[] currentStates = getCurrentModuleStates(); // Method to get the current swerve module states
-    previousSetpoint = new SwerveSetpoint(currentSpeeds, currentStates,
-        DriveFeedforwards.zeros(robotConfig.numModules));
+    previousSetpoint = new SwerveSetpoint(currentSpeeds, currentStates, DriveFeedforwards.zeros(robotConfig.numModules));
   }
 
   @Override
   public void periodic() {
     m_odometry.update(Rotation2d.fromDegrees(-1 * m_gyro.getAngle()),
         new SwerveModulePosition[] {
-            m_frontLeft.getPosition(),
-            m_frontRight.getPosition(),
-            m_rearLeft.getPosition(),
-            m_rearRight.getPosition() });
+          m_frontLeft.getPosition(),
+          m_frontRight.getPosition(),
+          m_rearLeft.getPosition(),
+          m_rearRight.getPosition()});
 
     m_field.setRobotPose(getPose());
 
@@ -191,9 +190,9 @@ public class DriveSubsystem extends SubsystemBase {
 
         // The camera sits on a rotating turret, so its reported position
         // shifts as the turret rotates (the fixed camera-to-robot offset
-        // in the Limelight settings becomes wrong). Use loose std devs
+        // in the Limelight settings becomes wrong).  Use loose std devs
         // so wheel odometry dominates position; vision just corrects
-        // long-term drift. Heading is fully ignored (turret yaw ≠ robot yaw).
+        // long-term drift.  Heading is fully ignored (turret yaw ≠ robot yaw).
         double xyStdDev = 0.5 * tagDistance;
         Matrix<N3, N1> visionStdDevs = VecBuilder.fill(xyStdDev, xyStdDev, Double.MAX_VALUE);
 
@@ -221,10 +220,10 @@ public class DriveSubsystem extends SubsystemBase {
    */
   public ChassisSpeeds getRobotRelativeSpeeds() {
     return DriveConstants.kDriveKinematics.toChassisSpeeds(
-        m_frontLeft.getState(),
-        m_frontRight.getState(),
-        m_rearLeft.getState(),
-        m_rearRight.getState());
+      m_frontLeft.getState(),
+      m_frontRight.getState(),
+      m_rearLeft.getState(),
+      m_rearRight.getState());
   }
 
   /**
@@ -236,10 +235,10 @@ public class DriveSubsystem extends SubsystemBase {
     m_odometry.resetPosition(
         Rotation2d.fromDegrees(-1 * m_gyro.getAngle()),
         new SwerveModulePosition[] {
-            m_frontLeft.getPosition(),
-            m_frontRight.getPosition(),
-            m_rearLeft.getPosition(),
-            m_rearRight.getPosition()
+          m_frontLeft.getPosition(),
+          m_frontRight.getPosition(),
+          m_rearLeft.getPosition(),
+          m_rearRight.getPosition()
         },
         pose);
   }
@@ -247,11 +246,10 @@ public class DriveSubsystem extends SubsystemBase {
   /**
    * Method to drive the robot using joystick info.
    *
-   * @param xSpeed        Speed of the robot in the x direction (forward).
-   * @param ySpeed        Speed of the robot in the y direction (sideways).
-   * @param rot           Angular rate of the robot.
-   * @param fieldRelative Whether the provided x and y speeds are relative to the
-   *                      field.
+   * @param xSpeed Speed of the robot in the x direction (forward).
+   * @param ySpeed Speed of the robot in the y direction (sideways).
+   * @param rot Angular rate of the robot.
+   * @param fieldRelative Whether the provided x and y speeds are relative to the field.
    */
   public void drive(double xSpeed, double ySpeed, double rot, boolean fieldRelative) {
     // Convert the commanded speeds into the correct units for the drivetrain
@@ -259,14 +257,15 @@ public class DriveSubsystem extends SubsystemBase {
     double ySpeedDelivered = ySpeed * DriveConstants.kMaxSpeedMetersPerSecond;
     double rotDelivered = rot * DriveConstants.kMaxAngularSpeed;
 
-    var swerveModuleStates = DriveConstants.kDriveKinematics.toSwerveModuleStates(
-        fieldRelative
-            ? ChassisSpeeds.fromFieldRelativeSpeeds(
-                xSpeedDelivered,
-                ySpeedDelivered,
-                rotDelivered,
-                Rotation2d.fromDegrees(-1 * m_gyro.getAngle()))
-            : new ChassisSpeeds(xSpeedDelivered, ySpeedDelivered, rotDelivered));
+    var swerveModuleStates =
+        DriveConstants.kDriveKinematics.toSwerveModuleStates(
+            fieldRelative
+                ? ChassisSpeeds.fromFieldRelativeSpeeds(
+                    xSpeedDelivered,
+                    ySpeedDelivered,
+                    rotDelivered,
+                    Rotation2d.fromDegrees(-1 * m_gyro.getAngle()))
+                : new ChassisSpeeds(xSpeedDelivered, ySpeedDelivered, rotDelivered));
     SwerveDriveKinematics.desaturateWheelSpeeds(
         swerveModuleStates, DriveConstants.kMaxSpeedMetersPerSecond);
     m_frontLeft.setDesiredState(swerveModuleStates[0]);
@@ -276,18 +275,18 @@ public class DriveSubsystem extends SubsystemBase {
   }
 
   /**
-   * This method will take in desired robot-relative chassis speeds,
-   * generate a swerve setpoint, then set the target state for each module
-   *
-   * @param speeds The desired robot-relative speeds
-   */
+    * This method will take in desired robot-relative chassis speeds,
+    * generate a swerve setpoint, then set the target state for each module
+    *
+    * @param speeds The desired robot-relative speeds
+    */
   public void drive(ChassisSpeeds speeds) {
     // Note: it is important to not discretize speeds before or after
     // using the setpoint generator, as it will discretize them for you
     previousSetpoint = setpointGenerator.generateSetpoint(
-        previousSetpoint, // The previous setpoint
-        speeds, // The desired target speeds
-        0.02 // The loop time of the robot code, in seconds
+      previousSetpoint, // The previous setpoint
+      speeds, // The desired target speeds
+      0.02 // The loop time of the robot code, in seconds
     );
     setModuleStates(previousSetpoint.moduleStates()); // Method that will drive the robot given target module states
   }
@@ -341,12 +340,11 @@ public class DriveSubsystem extends SubsystemBase {
   }
 
   private void zeroHeadingWithAdjustment() {
-    // Software yaw zero: avoids firmware zeroYaw() rejection when NavX reports
-    // calibration.
+    // Software yaw zero: avoids firmware zeroYaw() rejection when NavX reports calibration.
     m_gyro.setAngleAdjustment(0.0);
     m_gyro.setAngleAdjustment(-m_gyro.getAngle());
   }
-
+  
   /**
    * Returns the heading of the robot.
    *
@@ -370,8 +368,8 @@ public class DriveSubsystem extends SubsystemBase {
    *
    * @return The Swerve Module States of the robot
    */
-  public SwerveModuleState[] getCurrentModuleStates() {
-    SwerveModuleState[] states = new SwerveModuleState[4];
+  public SwerveModuleState [] getCurrentModuleStates() {
+    SwerveModuleState [] states = new SwerveModuleState[4];
     states[0] = m_frontLeft.getState();
     states[1] = m_frontRight.getState();
     states[2] = m_rearLeft.getState();

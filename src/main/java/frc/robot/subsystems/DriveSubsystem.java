@@ -166,21 +166,29 @@ public class DriveSubsystem extends SubsystemBase {
     SmartDashboard.putBoolean("Drive/GyroConnected", m_gyro.isConnected());
     SmartDashboard.putBoolean("Drive/GyroCalibrating", m_gyro.isCalibrating());
 
-    // Send the robot heading to the Limelight so MegaTag2 can compute
-    // accurate poses even from a single tag.
+    // Send the raw gyro heading (not the fused estimate) to the Limelight so
+    // MegaTag2 uses a heading that cannot be corrupted by bad vision measurements.
     if (m_vision != null) {
-      m_vision.setRobotOrientation(
-          pose.getRotation().getDegrees(),
-          getTurnRate());
+      m_vision.setRobotOrientation(getHeading(), getTurnRate());
     }
 
-    // Feed Limelight pose into the estimator when the fix looks reliable
+    // Feed Limelight (MT2) pose into the estimator when the fix looks reliable
     if (m_vision != null && m_vision.hasTarget()) {
       double tagDistance = m_vision.getAverageTagDistance();
       int tagCount = m_vision.getTagCount();
 
       // Only accept fixes within 4 meters; require 2+ tags beyond 2 meters
       if (tagDistance < 4.0 && (tagCount >= 2 || tagDistance < 2.0)) {
+        Pose2d visionPose = m_vision.getRobotPose();
+
+        // Reject implausible jumps: if the proposed pose is more than 1 m from
+        // the current estimate the measurement is likely stale or corrupt.
+        double jumpMeters = visionPose.getTranslation()
+            .getDistance(getPose().getTranslation());
+        if (jumpMeters > 1.0) {
+          return;
+        }
+
         // The camera sits on a rotating turret, so its reported position
         // shifts as the turret rotates (the fixed camera-to-robot offset
         // in the Limelight settings becomes wrong). Use loose std devs
@@ -190,7 +198,7 @@ public class DriveSubsystem extends SubsystemBase {
         Matrix<N3, N1> visionStdDevs = VecBuilder.fill(xyStdDev, xyStdDev, Double.MAX_VALUE);
 
         m_odometry.addVisionMeasurement(
-            m_vision.getRobotPose(),
+            visionPose,
             m_vision.getPoseTimestamp(),
             visionStdDevs);
       }

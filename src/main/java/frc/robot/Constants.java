@@ -45,33 +45,71 @@ public final class Constants {
 
   public static final class ShooterSubsystemConstants {
 
-    /** Default shooter motor power for manual/forward shooting (0.0 – 1.0). */
-    public static final double kDefaultShooterPower = 0.2;
+      /** Default shooter wheel target speed (RPM) for manual/forward shooting. */
+      public static final double kDefaultShooterRpm = 3290.0;
+      /** Default reverse shooter speed (RPM) to clear jams. */
+      public static final double kDefaultReverseShooterRpm = -3800.0;
+
+      /**
+       * Shooter is considered "ready" when measured RPM is within this many RPM of
+       * the target.
+       */
+      public static final double kReadyToleranceRpm = 200.0;
+      /**
+       * Once ready, the shooter stays ready until the error exceeds
+       * kReadyToleranceRpm + kHysteresisRpm. This prevents feed stop/start cycling
+       * caused by small target RPM shifts from pose-estimate flicker.
+       */
+      public static final double kHysteresisRpm = 100.0;
 
     public static final class TurningSetpoints {
       public static final double kturnForawrd = 0.9;
       public static final double ktunReverse = -0.9;
     }
 
-    public static final class TurretSetpoints {
-      public static final double kPos = 0.2;
-      public static final double kNeg = -0.2;
-    }
+      /**
+       * Distance-to-RPM lookup table for the shooter.
+       * Each row is { distanceMeters, shooterRpm }.
+       * Add or adjust rows once you have real characterization data.
+       */
+      public static final class ShooterRpmMap {
+        public static final double[][] kDistanceRpmTable = {
+          // { distance (m), shooter RPM } — must be sorted ascending by distance
+          { Units.inchesToMeters(76),  3000.0 },
+          { Units.inchesToMeters(120), 3200.0 },
+          { Units.inchesToMeters(212), 4000.0 },
+        };
+      }
 
-    /**
-     * Distance-to-power lookup table for the shooter.
-     * Each row is { distanceMeters, motorPower (0.0 – 1.0) }.
-     * Add or adjust rows once you have real data.
-     */
-    public static final class ShooterPowerMap {
-      public static final double[][] kDistancePowerTable = {
-          // { distance (m), motor power }
-          // TODO: replace with real characterization data
-          { Units.inchesToMeters(120), 0.54 },
-          { Units.inchesToMeters(160), 0.58 },
-          { Units.inchesToMeters(183), 0.58 },
-          { Units.inchesToMeters(206), 0.80 },
-      };
+      public static final class TurretTracking {
+        // Proportional gain: output power per degree of TX error (vision tracking)
+        public static final double kP = 0.02;
+        // Default proportional gain for pose tracking (degrees of error → motor power).
+        // Tunable at runtime via SmartDashboard key "Pose Tracking Gain".
+        private static final double kPosePDefault = 0.008;
+        public static double getPoseP() {
+          return SmartDashboard.getNumber("Pose Tracking Gain", kPosePDefault);
+        }
+        // Turret stops correcting when error is within this many degrees
+        public static final double kDeadband = 0.5;
+        // Maximum output power allowed during tracking
+        public static final double kMaxPower = 0.5;
+        // Low-pass filter weight for incoming TX (0 = frozen, 1 = no filtering)
+        public static final double kTXFilterAlpha = 1;
+        // Seconds to continue tracking on last known TX after losing the target
+        public static final double kTargetLostTimeoutSecs = 0.3;
+
+        // Encoder rotations per one full turret rotation (gear ratio).
+        // To measure: command the turret to rotate exactly 360° and read totalRot.
+        public static final double kEncoderToTurretRatio = 8.333;
+
+        // Hub center positions in WPILib field coordinates (origin = blue alliance corner).
+        // X = distance from blue alliance wall, Y = distance from bottom field border.
+        // Measured from PathPlanner field layout.
+        public static final Translation2d kBlueHubCenter = new Translation2d(4.631, 4.041);
+        public static final Translation2d kRedHubCenter = new Translation2d(11.950, 4.050);
+      }
+
     }
 
     public static final class TurretTracking {

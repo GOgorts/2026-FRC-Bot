@@ -1,7 +1,10 @@
 package frc.robot.subsystems;
 
 import com.revrobotics.PersistMode;
+import com.revrobotics.RelativeEncoder;
 import com.revrobotics.ResetMode;
+import com.revrobotics.spark.SparkBase.ControlType;
+import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -13,22 +16,25 @@ import frc.robot.Configs;
 import frc.robot.Constants.AllianceHelper;
 import frc.robot.Constants.ShooterSubsystemConstants;
 import frc.robot.Constants.ShooterSubsystemConstants.TurretTracking;
-import frc.robot.subsystems.DriveSubsystem;
 
 public class ShooterSubsystem extends SubsystemBase {
 
         private static final int shootingMotorCanID = 15;
-        private static final String kForwardKey = "Shooter/Forward";
-        private static final String kReverseKey = "Shooter/Reverse";
+        private static final String kForwardRpmKey = "Shooter/ForwardRPM";
+        private static final String kReverseRpmKey = "Shooter/ReverseRPM";
 
-        private SparkMax shootingMotor = new SparkMax(shootingMotorCanID, MotorType.kBrushless);
+        private final SparkMax shootingMotor = new SparkMax(shootingMotorCanID, MotorType.kBrushless);
+        private final RelativeEncoder shootingEncoder = shootingMotor.getEncoder();
+        private final SparkClosedLoopController shootingController = shootingMotor.getClosedLoopController();
         private final DriveSubsystem m_drive;
+        private double targetShooterRpm = 0.0;
+        private boolean m_isReady = false;
 
-        private static final InterpolatingDoubleTreeMap kDistanceToPower = new InterpolatingDoubleTreeMap();
+        private static final InterpolatingDoubleTreeMap kDistanceToRpm = new InterpolatingDoubleTreeMap();
 
         static {
-                for (double[] entry : ShooterSubsystemConstants.ShooterPowerMap.kDistancePowerTable) {
-                        kDistanceToPower.put(entry[0], entry[1]);
+                for (double[] entry : ShooterSubsystemConstants.ShooterRpmMap.kDistanceRpmTable) {
+                        kDistanceToRpm.put(entry[0], entry[1]);
                 }
         }
 
@@ -38,14 +44,36 @@ public class ShooterSubsystem extends SubsystemBase {
                                 Configs.ShooterSubsystem.ShooterConfig, ResetMode.kResetSafeParameters,
                                 PersistMode.kPersistParameters);
 
-                SmartDashboard.putNumber(kForwardKey, ShooterSubsystemConstants.kDefaultShooterPower);
-                SmartDashboard.putNumber(kReverseKey, -0.67);
+                SmartDashboard.putNumber(kForwardRpmKey, ShooterSubsystemConstants.kDefaultShooterRpm);
+                SmartDashboard.putNumber(kReverseRpmKey, ShooterSubsystemConstants.kDefaultReverseShooterRpm);
         }
 
         @Override
         public void periodic() {
+                double measuredRpm = shootingEncoder.getVelocity();
+                double error = Math.abs(measuredRpm - targetShooterRpm);
+
+                if (targetShooterRpm == 0.0) {
+                        m_isReady = false;
+                } else if (!m_isReady) {
+                        m_isReady = error <= ShooterSubsystemConstants.kReadyToleranceRpm;
+                } else {
+                        // Stay ready through small target shifts; only drop out if error grows
+                        // beyond the tolerance + hysteresis band
+                        m_isReady = error <= ShooterSubsystemConstants.kReadyToleranceRpm
+                                        + ShooterSubsystemConstants.kHysteresisRpm;
+                }
+
                 SmartDashboard.putNumber("Shooter/DistanceToHub", getDistanceToHub());
-                SmartDashboard.putNumber("Shooter/AutomaticPower", getPowerForDistance(getDistanceToHub()));
+                SmartDashboard.putNumber("Shooter/AutomaticRPM", getRpmForDistance(getDistanceToHub()));
+                SmartDashboard.putNumber("Shooter/TargetRPM", targetShooterRpm);
+                SmartDashboard.putNumber("Shooter/MeasuredRPM", measuredRpm);
+                SmartDashboard.putBoolean("Shooter/IsReady", m_isReady);
+        }
+
+        /** Returns true when the shooter is spun up to within tolerance of its target RPM. */
+        public boolean isShooterReady() {
+                return m_isReady;
         }
 
         /**
@@ -61,38 +89,40 @@ public class ShooterSubsystem extends SubsystemBase {
         }
 
         /**
-         * Returns interpolated shooter motor power for a given distance from the hub
+         * Returns interpolated shooter target RPM for a given distance from the hub
          * (meters).
          * Values outside the table range are clamped to the nearest endpoint.
          */
-        public double getPowerForDistance(double distanceMeters) {
-                return kDistanceToPower.get(distanceMeters);
+        public double getRpmForDistance(double distanceMeters) {
+                return kDistanceToRpm.get(distanceMeters);
         }
 
         /**
-         * Returns a command that runs the shooter at the interpolated power for the
-         * current hub distance.
+         * Returns a command that continuously updates the shooter to the interpolated
+         * RPM for the live hub distance. Updating every cycle lets isShooterReady()
+         * track the actual target rather than a stale snapshot.
          */
         public Command runShooterAutomaticCommand() {
-                return this.startEnd(
-                                () -> this.setShooterPower(getPowerForDistance(getDistanceToHub())),
-                                () -> this.setShooterPower(0.0));
+                return this.run(() -> this.setShooterRpm(getRpmForDistance(getDistanceToHub())))
+                                .finallyDo(() -> this.setShooterRpm(0.0));
         }
 
-        private void setShooterPower(double power) {
-                shootingMotor.set(power);
+        private void setShooterRpm(double rpm) {
+                targetShooterRpm = rpm;
+                shootingController.setSetpoint(rpm, ControlType.kVelocity);
         }
 
         public Command runShooterCommand() {
                 return this.startEnd(
-                                () -> this.setShooterPower(SmartDashboard.getNumber(kForwardKey,
-                                                ShooterSubsystemConstants.kDefaultShooterPower)),
-                                () -> this.setShooterPower(0.0));
+                                () -> this.setShooterRpm(SmartDashboard.getNumber(kForwardRpmKey,
+                                                ShooterSubsystemConstants.kDefaultShooterRpm)),
+                                () -> this.setShooterRpm(0.0));
         }
 
         public Command reverseShooterCommand() {
                 return this.startEnd(
-                                () -> this.setShooterPower(SmartDashboard.getNumber(kReverseKey, -0.67)),
-                                () -> this.setShooterPower(0.0));
+                                () -> this.setShooterRpm(SmartDashboard.getNumber(kReverseRpmKey,
+                                                ShooterSubsystemConstants.kDefaultReverseShooterRpm)),
+                                () -> this.setShooterRpm(0.0));
         }
 }

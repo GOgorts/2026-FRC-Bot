@@ -174,6 +174,8 @@ public class TurretSubsystem extends SubsystemBase {
 
         SmartDashboard.putNumber("Turret/PoseDesiredDeg", desiredAngleDeg);
         SmartDashboard.putNumber("Turret/PoseErrorDeg", error);
+        SmartDashboard.putNumber("Turret/FieldAngleDeg", fieldAngleDeg);
+        SmartDashboard.putNumber("Turret/RobotHeadingDeg", robotHeadingDeg);
         SmartDashboard.putNumber("Turret/DX", dx);
         SmartDashboard.putNumber("Turret/DY", dy);
         SmartDashboard.putBoolean("Target Lock", Math.abs(error) < TurretTracking.kDeadband);

@@ -154,6 +154,20 @@ public class DriveSubsystem extends SubsystemBase {
 
     m_field.setRobotPose(getPose());
 
+    Pose2d pose = getPose();
+    SmartDashboard.putNumber("Drive/HeadingDeg", pose.getRotation().getDegrees());
+    SmartDashboard.putNumber("Drive/PoseX", pose.getX());
+    SmartDashboard.putNumber("Drive/PoseY", pose.getY());
+    SmartDashboard.putNumber("Drive/RawGyroDeg", -1 * m_gyro.getAngle());
+
+    // Send the robot heading to the Limelight so MegaTag2 can compute
+    // accurate poses even from a single tag.
+    if (m_vision != null) {
+      m_vision.setRobotOrientation(
+          pose.getRotation().getDegrees(),
+          getTurnRate());
+    }
+
     // Feed Limelight pose into the estimator when the fix looks reliable
     if (m_vision != null && m_vision.hasTarget()) {
       double tagDistance = m_vision.getAverageTagDistance();
@@ -161,11 +175,12 @@ public class DriveSubsystem extends SubsystemBase {
 
       // Only accept fixes within 4 meters; require 2+ tags beyond 2 meters
       if (tagDistance < 4.0 && (tagCount >= 2 || tagDistance < 2.0)) {
-        // Scale x/y trust inversely with distance: tighter std devs when close.
-        // Heading from Limelight is discarded entirely — the camera sits on a
-        // rotating turret so its reported yaw is offset by the turret angle.
-        // The gyro owns heading; vision only corrects translation drift.
-        double xyStdDev = 0.1 * tagDistance;
+        // The camera sits on a rotating turret, so its reported position
+        // shifts as the turret rotates (the fixed camera-to-robot offset
+        // in the Limelight settings becomes wrong).  Use loose std devs
+        // so wheel odometry dominates position; vision just corrects
+        // long-term drift.  Heading is fully ignored (turret yaw ≠ robot yaw).
+        double xyStdDev = 0.5 * tagDistance;
         Matrix<N3, N1> visionStdDevs = VecBuilder.fill(xyStdDev, xyStdDev, Double.MAX_VALUE);
 
         m_odometry.addVisionMeasurement(

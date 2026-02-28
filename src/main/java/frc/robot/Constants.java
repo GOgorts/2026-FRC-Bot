@@ -87,7 +87,7 @@ public final class Constants {
 
         // Encoder rotations per one full turret rotation (gear ratio).
         // To measure: command the turret to rotate exactly 360° and read totalRot.
-        public static final double kEncoderToTurretRatio = 10.0;
+        public static final double kEncoderToTurretRatio = 7.5;
 
         // Hub center positions in WPILib field coordinates (origin = blue alliance corner).
         // X = distance from blue alliance wall, Y = distance from bottom field border.
@@ -193,6 +193,12 @@ public final class Constants {
 
     /** Pipeline index used on startup. */
     public static final int kDefaultPipeline = 0;
+
+    /** Red alliance hub AprilTag IDs used for turret tx-based tracking. */
+    public static final int[] kRedHubTagIds = { 2, 3, 4, 5, 8, 9, 10, 11 };
+
+    /** Blue alliance hub AprilTag IDs used for turret tx-based tracking. */
+    public static final int[] kBlueHubTagIds = { 18, 19, 20, 21, 24, 25, 26, 27 };
 
     /**
      * Maximum average tag distance (meters) below which a pose estimate is

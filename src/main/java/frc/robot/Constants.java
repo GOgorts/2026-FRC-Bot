@@ -8,6 +8,8 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 /**
@@ -41,6 +43,9 @@ public final class Constants {
 
   public static final class ShooterSubsystemConstants{
 
+      /** Default shooter motor power for manual/forward shooting (0.0 – 1.0). */
+      public static final double kDefaultShooterPower = 0.58;
+
       public static final class TurningSetpoints {
         public static final double kturnForawrd = 0.9;
         public static final double ktunReverse = -0.9;
@@ -50,13 +55,29 @@ public final class Constants {
         public static final double kNeg = -0.2;
       }
 
+      /**
+       * Distance-to-power lookup table for the shooter.
+       * Each row is { distanceMeters, motorPower (0.0 – 1.0) }.
+       * Add or adjust rows once you have real data.
+       */
+      public static final class ShooterPowerMap {
+        public static final double[][] kDistancePowerTable = {
+          // { distance (m), motor power }
+          // TODO: replace with real characterization data
+          { 1.2, 0.54 },
+          { 1.6, 0.58 },
+          { 1.83, 0.58 },
+          { 2.06, 0.80 },
+        };
+      }
+
       public static final class TurretTracking {
         // Proportional gain: output power per degree of TX error (vision tracking)
         public static final double kP = 0.02;
         // Proportional gain: output power per degree of angle error (pose tracking)
-        public static final double kPoseP = SmartDashboard.getNumber("Pose Tracking Gain", 0.02);
+        public static final double kPoseP = SmartDashboard.getNumber("Pose Tracking Gain", 0.008);
         // Turret stops correcting when error is within this many degrees
-        public static final double kDeadband = 2.0;
+        public static final double kDeadband = 0.5;
         // Maximum output power allowed during tracking
         public static final double kMaxPower = 0.5;
         // Low-pass filter weight for incoming TX (0 = frozen, 1 = no filtering)
@@ -70,11 +91,9 @@ public final class Constants {
 
         // Hub center positions in WPILib field coordinates (origin = blue alliance corner).
         // X = distance from blue alliance wall, Y = distance from bottom field border.
-        // Measured from CAD: 181.928" from blue wall, 158.844" from bottom border.
-        public static final Translation2d kBlueHubCenter = new Translation2d(
-            Units.inchesToMeters(181.928), Units.inchesToMeters(158.844));
-        public static final Translation2d kRedHubCenter = new Translation2d(
-            Units.inchesToMeters(651.25 - 181.928), Units.inchesToMeters(158.844));
+        // Measured from PathPlanner field layout.
+        public static final Translation2d kBlueHubCenter = new Translation2d(4.631, 4.041);
+        public static final Translation2d kRedHubCenter = new Translation2d(11.950, 4.050);
       }
 
     }
@@ -193,6 +212,43 @@ public final class Constants {
 
   public static final class NeoMotorConstants {
     public static final double kFreeSpeedRpm = 5676;
+  }
+
+  /**
+   * Alliance helper that allows a manual SmartDashboard override for the
+   * alliance color. Useful when DriverStation.getAlliance() returns empty
+   * (e.g., FMS handshake hasn't completed yet).
+   *
+   * Dashboard keys (all under "Alliance/"):
+   *   ManualOverrideEnabled  – toggle to true to ignore FMS/DS and use the manual value
+   *   ManualIsRed            – set to true for Red, false for Blue when override is on
+   *   FMSPresent             – (read-only) whether DriverStation.getAlliance() has a value
+   *   CodeIsRed              – (read-only) the alliance the code is actually using
+   */
+  public static final class AllianceHelper {
+    public static final String kOverrideEnabledKey = "Alliance/ManualOverrideEnabled";
+    public static final String kManualIsRedKey     = "Alliance/ManualIsRed";
+    public static final String kFMSPresentKey      = "Alliance/FMSPresent";
+    public static final String kCodeIsRedKey       = "Alliance/CodeIsRed";
+
+    static {
+      SmartDashboard.putBoolean(kOverrideEnabledKey, false);
+      SmartDashboard.putBoolean(kManualIsRedKey, false);
+    }
+
+    /** Returns true if the robot is on the Red alliance, using the manual override if enabled. */
+    public static boolean isRedAlliance() {
+      if (SmartDashboard.getBoolean(kOverrideEnabledKey, false)) {
+        return SmartDashboard.getBoolean(kManualIsRedKey, false);
+      }
+      return DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red;
+    }
+
+    /** Publishes diagnostic alliance state to SmartDashboard. Call from a periodic method. */
+    public static void publishDiagnostics() {
+      SmartDashboard.putBoolean(kFMSPresentKey, DriverStation.getAlliance().isPresent());
+      SmartDashboard.putBoolean(kCodeIsRedKey, isRedAlliance());
+    }
   }
 
   public static final class SimulationRobotConstants {

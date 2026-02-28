@@ -77,7 +77,7 @@ public class RobotContainer {
     public RobotContainer() {
         m_visionSubsystem = new VisionSubsystem();
         m_robotDrive = new DriveSubsystem(m_visionSubsystem);
-        m_ShooterSubsystem = new ShooterSubsystem();
+        m_ShooterSubsystem = new ShooterSubsystem(m_robotDrive);
         m_TurningSubsystem = new TurningSubsystem();
         m_TurretSubsystem = new TurretSubsystem(m_visionSubsystem, m_robotDrive);
         m_IntakeSubsystem = new IntakeSubsystem();
@@ -191,7 +191,7 @@ public class RobotContainer {
         m_driverController.leftTrigger().onTrue(m_IntakeSubsystem.flipDownCommand());
 
         m_operatorController.rightTrigger(OIConstants.kTriggerButtonThreshold)
-                .whileTrue(m_ShooterSubsystem.runShooterCommand()
+                .whileTrue(m_ShooterSubsystem.runShooterAutomaticCommand()
                         .alongWith(m_TurningSubsystem.runTurningCommand()));
         m_operatorController.leftTrigger(OIConstants.kTriggerButtonThreshold)
                 .whileTrue(m_ShooterSubsystem.reverseShooterCommand()

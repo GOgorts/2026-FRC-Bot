@@ -9,11 +9,10 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
-import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants.AllianceHelper;
 import frc.robot.Constants.VisionConstants;
 
 public class VisionSubsystem extends SubsystemBase {
@@ -129,6 +128,23 @@ public class VisionSubsystem extends SubsystemBase {
     }
 
     // ---------------------------------------------------------------------------
+    // Robot orientation (MegaTag2)
+    // ---------------------------------------------------------------------------
+
+    /**
+     * Sends the robot's current heading and yaw rate to the Limelight so it can
+     * use MegaTag2 for pose estimation. Must be called every loop before reading
+     * botpose_orb values.
+     *
+     * @param yawDeg            Robot yaw in degrees (WPILib convention: CCW positive)
+     * @param yawRateDegPerSec  Robot yaw rate in degrees per second
+     */
+    public void setRobotOrientation(double yawDeg, double yawRateDegPerSec) {
+        m_limelightTable.getEntry("robot_orientation")
+                .setDoubleArray(new double[] { yawDeg, yawRateDegPerSec, 0, 0, 0, 0 });
+    }
+
+    // ---------------------------------------------------------------------------
     // Camera controls
     // ---------------------------------------------------------------------------
 
@@ -150,8 +166,7 @@ public class VisionSubsystem extends SubsystemBase {
     // ---------------------------------------------------------------------------
 
     private double[] getAllianceBotPoseArray() {
-        boolean isRed = DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red;
-        String key = isRed ? "botpose_wpired" : "botpose_wpiblue";
+        String key = AllianceHelper.isRedAlliance() ? "botpose_wpired" : "botpose_wpiblue";
         return m_limelightTable.getEntry(key).getDoubleArray(new double[0]);
     }
 
@@ -168,5 +183,6 @@ public class VisionSubsystem extends SubsystemBase {
         SmartDashboard.putNumber("Vision/TA", getTA());
         SmartDashboard.putNumber("Vision/TargetID", getTargetID());
         SmartDashboard.putNumber("Vision/TagCount", getTagCount());
+        AllianceHelper.publishDiagnostics();
     }
 }

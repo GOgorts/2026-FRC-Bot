@@ -50,7 +50,7 @@ public class TurningSubsystem extends SubsystemBase {
 
     public Command runTurningCommand() {
         return new SequentialCommandGroup(
-                new WaitCommand(.5)
+                new WaitCommand(1)
                         .andThen(
                                 this.startEnd(
                                         () -> this.setTurningPower(TurningSetpoints.kturnForawrd),
@@ -60,7 +60,7 @@ public class TurningSubsystem extends SubsystemBase {
 
     public Command reverseTurningCommand() {
         return new SequentialCommandGroup(
-                new WaitCommand(.5)
+                new WaitCommand(1)
                         .andThen(
                                 this.startEnd(
                                         () -> this.setTurningPower(TurningSetpoints.ktunReverse),

@@ -8,13 +8,12 @@ import com.revrobotics.spark.SparkMax;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Configs;
+import frc.robot.Constants.AllianceHelper;
 import frc.robot.Constants.ShooterSubsystemConstants.TurretSetpoints;
 import frc.robot.Constants.ShooterSubsystemConstants.TurretTracking;
 
@@ -160,8 +159,9 @@ public class TurretSubsystem extends SubsystemBase {
     private void poseTrack() {
         Pose2d robotPose = m_drive.getPose();
 
-        boolean isRed = DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red;
-        Translation2d hubPos = isRed ? TurretTracking.kRedHubCenter : TurretTracking.kBlueHubCenter;
+        Translation2d hubPos = AllianceHelper.isRedAlliance()
+                ? TurretTracking.kRedHubCenter
+                : TurretTracking.kBlueHubCenter;
 
         double dx = hubPos.getX() - robotPose.getX();
         double dy = hubPos.getY() - robotPose.getY();
@@ -174,6 +174,8 @@ public class TurretSubsystem extends SubsystemBase {
 
         SmartDashboard.putNumber("Turret/PoseDesiredDeg", desiredAngleDeg);
         SmartDashboard.putNumber("Turret/PoseErrorDeg", error);
+        SmartDashboard.putNumber("Turret/DX", dx);
+        SmartDashboard.putNumber("Turret/DY", dy);
         SmartDashboard.putBoolean("Target Lock", Math.abs(error) < TurretTracking.kDeadband);
 
         if (Math.abs(error) < TurretTracking.kDeadband) {

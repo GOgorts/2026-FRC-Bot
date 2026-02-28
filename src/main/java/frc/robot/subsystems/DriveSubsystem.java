@@ -26,6 +26,8 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.AutoConstants;
@@ -77,6 +79,8 @@ public class DriveSubsystem extends SubsystemBase {
 
   private VisionSubsystem m_vision;
 
+  private final Field2d m_field = new Field2d();
+
   // Setpoint generator for PathPlanner
   private final SwerveSetpointGenerator setpointGenerator;
   private SwerveSetpoint previousSetpoint;
@@ -84,6 +88,7 @@ public class DriveSubsystem extends SubsystemBase {
   /** Creates a new DriveSubsystem. */
   public DriveSubsystem(VisionSubsystem vision) {
     m_vision = vision;
+    SmartDashboard.putData("Field", m_field);
 
     // Get the robot configuration from PathPlanner's GUI settings
     RobotConfig robotConfig = null;
@@ -147,6 +152,8 @@ public class DriveSubsystem extends SubsystemBase {
           m_rearLeft.getPosition(),
           m_rearRight.getPosition()});
 
+    m_field.setRobotPose(getPose());
+
     // Feed Limelight pose into the estimator when the fix looks reliable
     if (m_vision != null && m_vision.hasTarget()) {
       double tagDistance = m_vision.getAverageTagDistance();
@@ -154,10 +161,12 @@ public class DriveSubsystem extends SubsystemBase {
 
       // Only accept fixes within 4 meters; require 2+ tags beyond 2 meters
       if (tagDistance < 4.0 && (tagCount >= 2 || tagDistance < 2.0)) {
-        // Scale trust inversely with distance: tighter std devs when close
+        // Scale x/y trust inversely with distance: tighter std devs when close.
+        // Heading from Limelight is discarded entirely — the camera sits on a
+        // rotating turret so its reported yaw is offset by the turret angle.
+        // The gyro owns heading; vision only corrects translation drift.
         double xyStdDev = 0.1 * tagDistance;
-        double headingStdDev = Math.toRadians(10 * tagDistance);
-        Matrix<N3, N1> visionStdDevs = VecBuilder.fill(xyStdDev, xyStdDev, headingStdDev);
+        Matrix<N3, N1> visionStdDevs = VecBuilder.fill(xyStdDev, xyStdDev, Double.MAX_VALUE);
 
         m_odometry.addVisionMeasurement(
             m_vision.getRobotPose(),

@@ -129,6 +129,13 @@ public final class Constants {
 
   }
 
+  public static final class FieldConstants {
+    /** Field localisation snap point for the Blue alliance (meters, WPILib origin). */
+    public static final Translation2d kBlueLocalisationPoint = new Translation2d(3.56, 7.57);
+    /** Field localisation snap point for the Red alliance (meters, WPILib origin). */
+    public static final Translation2d kRedLocalisationPoint = new Translation2d(13.28, 6.88);
+  }
+
   public static final class DriveConstants {
     // Driving Parameters - Note that these are not the maximum capable speeds of
     // the robot, rather the allowed maximum speeds

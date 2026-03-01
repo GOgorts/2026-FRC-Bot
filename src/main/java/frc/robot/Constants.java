@@ -63,8 +63,8 @@ public final class Constants {
     public static final double kHysteresisRpm = 100.0;
 
     public static final class TurningSetpoints {
-      public static final double kturnForward = 0.9;
-      public static final double kturnReverse = -0.9;
+      public static final double kturnForward = 1;
+      public static final double kturnReverse = -1;
     }
 
     public static final class TurretSetpoints {

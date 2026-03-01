@@ -17,6 +17,12 @@
           }
         },
         {
+          "type": "named",
+          "data": {
+            "name": "FlipDown"
+          }
+        },
+        {
           "type": "parallel",
           "data": {
             "commands": [
@@ -30,6 +36,12 @@
                 "type": "named",
                 "data": {
                   "name": "Feed Shooter"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "FlipUp"
                 }
               }
             ]

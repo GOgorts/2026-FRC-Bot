@@ -110,10 +110,11 @@ public class RobotContainer {
                 // m_hangSubsystem.setDefaultCommand(m_hangSubsystem.idleCommand());
 
                 NamedCommands.registerCommand("Shoot", m_ShooterSubsystem.runShooterAutomaticCommand().withTimeout(10));
-                NamedCommands.registerCommand("FeedShooter",
-                                m_TurningSubsystem.runTurningCommand(m_ShooterSubsystem::isShooterReady)
-                                                .withTimeout(7));
+                NamedCommands.registerCommand("Feed Shooter",
+                                m_TurningSubsystem.runTurningCommand().withTimeout(7));
                 NamedCommands.registerCommand("Target", m_TurretSubsystem.trackTargetCommand().withTimeout(1));
+                NamedCommands.registerCommand("FlipUp", m_IntakeSubsystem.flipUpCommand().withTimeout(2));
+                NamedCommands.registerCommand("FlipDown", m_IntakeSubsystem.flipDownCommand().withTimeout(2));
 
                 // Register Named Commands for PathPlanner;
                 // NamedCommands.registerCommand("ElevatorLevel2",
@@ -200,8 +201,7 @@ public class RobotContainer {
                 m_operatorController.rightTrigger(OIConstants.kTriggerButtonThreshold)
                                 .whileTrue(m_ShooterSubsystem.runShooterAutomaticCommand()
                                                 .alongWith(m_TurningSubsystem
-                                                                .runTurningCommand(
-                                                                                m_ShooterSubsystem::isShooterReady)));
+                                                                .runTurningCommand()));
                 m_operatorController.leftTrigger(OIConstants.kTriggerButtonThreshold)
                                 .whileTrue(m_ShooterSubsystem.reverseShooterCommand()
                                                 .alongWith(m_TurningSubsystem.reverseTurningCommand()));
@@ -213,15 +213,15 @@ public class RobotContainer {
 
                 /*
                  * Diagnostic Mode — spin each drive wheel individually at the RPM set via
-                 * SmartDashboard key "Diagnostic/WheelRPM".  Press the same D-pad button
-                 * again to stop.  Only one wheel runs at a time (DriveSubsystem is a shared
+                 * SmartDashboard key "Diagnostic/WheelRPM". Press the same D-pad button
+                 * again to stop. Only one wheel runs at a time (DriveSubsystem is a shared
                  * resource, so scheduling a new diagnostic command cancels the previous one).
                  *
                  * D-Pad layout (driver controller):
-                 *   Up    → Front-Left  wheel
-                 *   Right → Front-Right wheel
-                 *   Down  → Rear-Right  wheel
-                 *   Left  → Rear-Left   wheel
+                 * Up → Front-Left wheel
+                 * Right → Front-Right wheel
+                 * Down → Rear-Right wheel
+                 * Left → Rear-Left wheel
                  */
                 m_driverController.povUp().toggleOnTrue(m_robotDrive.diagFrontLeftCommand());
                 m_driverController.povRight().toggleOnTrue(m_robotDrive.diagFrontRightCommand());

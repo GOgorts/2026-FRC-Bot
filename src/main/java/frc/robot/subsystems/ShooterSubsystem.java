@@ -73,7 +73,10 @@ public class ShooterSubsystem extends SubsystemBase {
                 SmartDashboard.putBoolean("Shooter/IsReady", m_isReady);
         }
 
-        /** Returns true when the shooter is spun up to within tolerance of its target RPM. */
+        /**
+         * Returns true when the shooter is spun up to within tolerance of its target
+         * RPM.
+         */
         public boolean isShooterReady() {
                 return m_isReady;
         }
@@ -105,9 +108,12 @@ public class ShooterSubsystem extends SubsystemBase {
         }
 
         /**
-         * Returns a command that spins up the shooter using either the distance-interpolated
-         * RPM (automatic) or the manual ForwardRPM value from the dashboard, depending on
-         * the Shooter/ManualMode toggle. Updating every cycle lets isShooterReady() track
+         * Returns a command that spins up the shooter using either the
+         * distance-interpolated
+         * RPM (automatic) or the manual ForwardRPM value from the dashboard, depending
+         * on
+         * the Shooter/ManualMode toggle. Updating every cycle lets isShooterReady()
+         * track
          * the actual target rather than a stale snapshot.
          */
         public Command runShooterAutomaticCommand() {
@@ -115,7 +121,7 @@ public class ShooterSubsystem extends SubsystemBase {
                         double rpm = isManualMode()
                                         ? SmartDashboard.getNumber(kForwardRpmKey,
                                                         ShooterSubsystemConstants.kDefaultShooterRpm)
-                                        : getRpmForDistance(getDistanceToHub());
+                                        : -getRpmForDistance(getDistanceToHub());
                         this.setShooterRpm(rpm);
                 }).finallyDo(() -> this.setShooterRpm(0.0));
         }

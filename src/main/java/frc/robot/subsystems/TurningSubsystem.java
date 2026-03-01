@@ -57,11 +57,13 @@ public class TurningSubsystem extends SubsystemBase {
          * small target RPM shifts from pose-estimate flicker do not stop and restart
          * feeding.
          */
-        public Command runTurningCommand(BooleanSupplier shooterReady) {
-                return Commands.waitUntil(shooterReady)
-                                .andThen(this.startEnd(
-                                                () -> this.setTurningPower(TurningSetpoints.kturnForward),
-                                                () -> this.setTurningPower(0.0)));
+        public Command runTurningCommand() {
+                return new SequentialCommandGroup(
+                                new WaitCommand(1)
+                                                .andThen(this.startEnd(
+                                                                () -> this.setTurningPower(
+                                                                                TurningSetpoints.kturnReverse),
+                                                                () -> this.setTurningPower(0.0))));
         }
 
         public Command reverseTurningCommand() {
@@ -70,7 +72,7 @@ public class TurningSubsystem extends SubsystemBase {
                                                 .andThen(
                                                                 this.startEnd(
                                                                                 () -> this.setTurningPower(
-                                                                                                TurningSetpoints.kturnReverse),
+                                                                                                TurningSetpoints.kturnForward),
                                                                                 () -> this.setTurningPower(0.0))));
 
         }

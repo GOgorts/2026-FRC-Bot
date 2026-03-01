@@ -17,35 +17,37 @@ import frc.robot.Configs;
 import frc.robot.Constants.IntakeSubsystemConstants.IntakeSetpoints;
 import frc.robot.Constants.IntakeSubsystemConstants.flipSetpoints;
 
-public class IntakeSubsystem extends SubsystemBase{
+public class IntakeSubsystem extends SubsystemBase {
 
     public enum Setpoint {
-    kUp, kDown;
-  }
+        kUp, kDown;
+    }
+
     private boolean wasResetByLimit = false;
     public static final int kIntakeMotorCanId = 9;
     private static final int kIntakeFlipCanID1 = 10;
     private static final int kIntakeFlipCanID2 = 11;
-    public IntakeSubsystem(){
-        //flipMotor1 & 2 were IntakeConfig (changed to FlipConfig)
+
+    public IntakeSubsystem() {
+        // flipMotor1 & 2 were IntakeConfig (changed to FlipConfig)
         intakeMotor.configure(
-            Configs.IntakeSubsystem.IntakeConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+                Configs.IntakeSubsystem.IntakeConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
         flipMotor1.configure(
-            Configs.IntakeSubsystem.FlipLeaderConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+                Configs.IntakeSubsystem.FlipLeaderConfig, ResetMode.kResetSafeParameters,
+                PersistMode.kPersistParameters);
         flipMotor2.configure(
-            Configs.IntakeSubsystem.FlipFollowerConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+                Configs.IntakeSubsystem.FlipFollowerConfig, ResetMode.kResetSafeParameters,
+                PersistMode.kPersistParameters);
         flipEncoder1.setPosition(0);
         flipEncoder2.setPosition(0);
 
         initializeFlip();
-        
+
     }
-    private SparkFlex intakeMotor = 
-        new SparkFlex(kIntakeMotorCanId, MotorType.kBrushless);
-    private SparkMax flipMotor1 = 
-        new SparkMax(kIntakeFlipCanID1,MotorType.kBrushless);
-    private SparkMax flipMotor2 = 
-        new SparkMax(kIntakeFlipCanID2,MotorType.kBrushless);
+
+    private SparkFlex intakeMotor = new SparkFlex(kIntakeMotorCanId, MotorType.kBrushless);
+    private SparkMax flipMotor1 = new SparkMax(kIntakeFlipCanID1, MotorType.kBrushless);
+    private SparkMax flipMotor2 = new SparkMax(kIntakeFlipCanID2, MotorType.kBrushless);
     private RelativeEncoder flipEncoder1 = flipMotor1.getEncoder();
     private RelativeEncoder flipEncoder2 = flipMotor2.getEncoder();
 
@@ -53,86 +55,78 @@ public class IntakeSubsystem extends SubsystemBase{
     private SparkClosedLoopController flip2Controller = flipMotor2.getClosedLoopController();
 
     private double flipCurrent = flipSetpoints.kUp;
-    
-    private void zeroIntakeOnLimitSwitch() {
-    if (!wasResetByLimit && flipMotor1.getReverseLimitSwitch().isPressed()&&flipMotor2.getReverseLimitSwitch().isPressed()) {
-      // Zero the encoder only when the limit switch is switches from "unpressed" to "pressed" to
-      // prevent constant zeroing while pressed
-      flipEncoder1.setPosition(0);
-      flipEncoder2.setPosition(0);
-      wasResetByLimit = true;
 
+    private void zeroIntakeOnLimitSwitch() {
+        if (!wasResetByLimit && flipMotor1.getReverseLimitSwitch().isPressed()
+                && flipMotor2.getReverseLimitSwitch().isPressed()) {
+            // Zero the encoder only when the limit switch is switches from "unpressed" to
+            // "pressed" to
+            // prevent constant zeroing while pressed
+            flipEncoder1.setPosition(0);
+            flipEncoder2.setPosition(0);
+            wasResetByLimit = true;
+
+        } else if (!flipMotor1.getReverseLimitSwitch().isPressed()
+                && flipMotor2.getReverseLimitSwitch().isPressed()) {
+            wasResetByLimit = false;
+        }
     }
-    else if (!flipMotor1.getReverseLimitSwitch().isPressed()
-    &&flipMotor2.getReverseLimitSwitch().isPressed()) {
-      wasResetByLimit = false;
-    }
-  }
 
     public void initializeFlip() {
-    // Check if limit switches are pressed at startup
-    if (flipMotor1.getReverseLimitSwitch().isPressed() &&
-        flipMotor2.getReverseLimitSwitch().isPressed()) {
-        
-        flipEncoder1.setPosition(0);
-        flipEncoder2.setPosition(0);
-        wasResetByLimit = true;
-        System.out.println("Flip encoder zeroed on startup");
-    } else {
-        System.out.println("Flip not at bottom, do not zero yet");
-    }
-}
+        // Check if limit switches are pressed at startup
+        if (flipMotor1.getReverseLimitSwitch().isPressed() &&
+                flipMotor2.getReverseLimitSwitch().isPressed()) {
 
-    
-
-    private void setIntakePower (double power) {
-         intakeMotor.set(power);
+            flipEncoder1.setPosition(0);
+            flipEncoder2.setPosition(0);
+            wasResetByLimit = true;
+            System.out.println("Flip encoder zeroed on startup");
+        } else {
+            System.out.println("Flip not at bottom, do not zero yet");
+        }
     }
-    private void setFlipSetpoint (){
-         //multiplied by -1 to ensure motor is inverted from Motor1
+
+    private void setIntakePower(double power) {
+        intakeMotor.set(power);
+    }
+
+    private void setFlipSetpoint() {
+        // multiplied by -1 to ensure motor is inverted from Motor1
         flip1Controller.setSetpoint(flipCurrent, ControlType.kMAXMotionPositionControl);
-        flip2Controller.setSetpoint(flipCurrent*-1, ControlType.kMAXMotionPositionControl);
-        
+        flip2Controller.setSetpoint(flipCurrent * -1, ControlType.kMAXMotionPositionControl);
+
     }
 
     public Command flipUpCommand() {
-    return this.runOnce(() -> {
-        flipCurrent = flipSetpoints.kIn;
-        setFlipSetpoint();
-        System.out.println("FlipUp ");
-    });
-}
-
-public Command flipDownCommand() {
-    return this.runOnce(() -> {
-        flipCurrent = flipSetpoints.kUp;
-        setFlipSetpoint();
-                System.out.println("FlipDown ");
-
-    });
-}
-
-    
-    public Command runIntakeCommand() {
-        
-            return this.startEnd(
-                () -> this.setIntakePower(IntakeSetpoints.kForward), () -> this.setIntakePower(0.0));
-                 }
-    
-    public Command reverseIntakeCommand() {
-            return this.startEnd(
-                () -> this.setIntakePower(IntakeSetpoints.kReverse), () -> this.setIntakePower(0.0));
-                 }
-
-
-    public void periodic()
-    {
-       // zeroIntakeOnLimitSwitch();
+        return this.runOnce(() -> {
+            flipCurrent = flipSetpoints.kIn;
+            setFlipSetpoint();
+            System.out.println("FlipUp ");
+        });
     }
 
-    }    
-    
+    public Command flipDownCommand() {
+        return this.runOnce(() -> {
+            flipCurrent = flipSetpoints.kDown;
+            setFlipSetpoint();
+            System.out.println("FlipDown ");
 
-   
-  
+        });
+    }
 
+    public Command runIntakeCommand() {
+
+        return this.startEnd(
+                () -> this.setIntakePower(IntakeSetpoints.kForward), () -> this.setIntakePower(0.0));
+    }
+
+    public Command reverseIntakeCommand() {
+        return this.startEnd(
+                () -> this.setIntakePower(IntakeSetpoints.kReverse), () -> this.setIntakePower(0.0));
+    }
+
+    public void periodic() {
+        // zeroIntakeOnLimitSwitch();
+    }
+
+}

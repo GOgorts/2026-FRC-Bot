@@ -89,6 +89,11 @@ public final class Configs {
     public static final SparkMaxConfig ShooterConfig = new SparkMaxConfig();
     static {
       ShooterConfig.inverted(true).idleMode(IdleMode.kBrake).smartCurrentLimit(40);
+      ShooterConfig.closedLoop
+          .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
+          .pid(0.0002, 0, 0)
+          .outputRange(-1.0, 1.0)
+          .feedForward.kV(1.0 / Constants.NeoMotorConstants.kFreeSpeedRpm);
     }
     public static final SparkMaxConfig turningConfig = new SparkMaxConfig();
     static {

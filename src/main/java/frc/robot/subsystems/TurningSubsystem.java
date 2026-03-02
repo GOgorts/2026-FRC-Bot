@@ -13,8 +13,10 @@ import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
+import java.util.function.BooleanSupplier;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.simulation.ElevatorSim;
 import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
@@ -49,15 +51,17 @@ public class TurningSubsystem extends SubsystemBase {
                 turningMotor.set(power);
         }
 
-        public Command runTurningCommand() {
-                return new SequentialCommandGroup(
-                                new WaitCommand(1)
-                                                .andThen(
-                                                                this.startEnd(
-                                                                                () -> this.setTurningPower(
-                                                                                                TurningSetpoints.kturnForawrd),
-                                                                                () -> this.setTurningPower(0.0))));
-
+        /**
+         * Waits until the shooter signals it is ready (spun up to target RPM), then
+         * runs the feeder. The readiness check uses hysteresis in ShooterSubsystem so
+         * small target RPM shifts from pose-estimate flicker do not stop and restart
+         * feeding.
+         */
+        public Command runTurningCommand(BooleanSupplier shooterReady) {
+                return Commands.waitUntil(shooterReady)
+                                .andThen(this.startEnd(
+                                                () -> this.setTurningPower(TurningSetpoints.kturnForawrd),
+                                                () -> this.setTurningPower(0.0)));
         }
 
         public Command reverseTurningCommand() {

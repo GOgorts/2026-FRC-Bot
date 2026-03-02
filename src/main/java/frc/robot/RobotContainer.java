@@ -110,7 +110,8 @@ public class RobotContainer {
                 // m_hangSubsystem.setDefaultCommand(m_hangSubsystem.idleCommand());
 
                 NamedCommands.registerCommand("Shoot", m_ShooterSubsystem.runShooterAutomaticCommand().withTimeout(5));
-                NamedCommands.registerCommand("FeedShooter", m_TurningSubsystem.runTurningCommand().withTimeout(5));
+                NamedCommands.registerCommand("FeedShooter",
+                                m_TurningSubsystem.runTurningCommand(m_ShooterSubsystem::isShooterReady).withTimeout(5));
                 // Register Named Commands for PathPlanner;
                 // NamedCommands.registerCommand("ElevatorLevel2",
                 // m_coralSubSystem.setSetpointCommand(Setpoint.kLevel2));
@@ -194,8 +195,9 @@ public class RobotContainer {
                 m_driverController.leftTrigger().onTrue(m_IntakeSubsystem.flipDownCommand());
 
                 m_operatorController.rightTrigger(OIConstants.kTriggerButtonThreshold)
-                                .whileTrue(m_ShooterSubsystem.runShooterCommand()
-                                                .alongWith(m_TurningSubsystem.runTurningCommand()));
+                                .whileTrue(m_ShooterSubsystem.runShooterAutomaticCommand()
+                                                .alongWith(m_TurningSubsystem
+                                                                .runTurningCommand(m_ShooterSubsystem::isShooterReady)));
                 m_operatorController.leftTrigger(OIConstants.kTriggerButtonThreshold)
                                 .whileTrue(m_ShooterSubsystem.reverseShooterCommand()
                                                 .alongWith(m_TurningSubsystem.reverseTurningCommand()));

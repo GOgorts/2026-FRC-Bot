@@ -43,8 +43,22 @@ public final class Constants {
 
   public static final class ShooterSubsystemConstants{
 
-      /** Default shooter motor power for manual/forward shooting (0.0 – 1.0). */
-      public static final double kDefaultShooterPower = 0.58;
+      /** Default shooter wheel target speed (RPM) for manual/forward shooting. */
+      public static final double kDefaultShooterRpm = 3290.0;
+      /** Default reverse shooter speed (RPM) to clear jams. */
+      public static final double kDefaultReverseShooterRpm = -3800.0;
+
+      /**
+       * Shooter is considered "ready" when measured RPM is within this many RPM of
+       * the target.
+       */
+      public static final double kReadyToleranceRpm = 200.0;
+      /**
+       * Once ready, the shooter stays ready until the error exceeds
+       * kReadyToleranceRpm + kHysteresisRpm. This prevents feed stop/start cycling
+       * caused by small target RPM shifts from pose-estimate flicker.
+       */
+      public static final double kHysteresisRpm = 100.0;
 
       public static final class TurningSetpoints {
         public static final double kturnForawrd = 0.9;
@@ -56,26 +70,28 @@ public final class Constants {
       }
 
       /**
-       * Distance-to-power lookup table for the shooter.
-       * Each row is { distanceMeters, motorPower (0.0 – 1.0) }.
-       * Add or adjust rows once you have real data.
+       * Distance-to-RPM lookup table for the shooter.
+       * Each row is { distanceMeters, shooterRpm }.
+       * Add or adjust rows once you have real characterization data.
        */
-      public static final class ShooterPowerMap {
-        public static final double[][] kDistancePowerTable = {
-          // { distance (m), motor power }
-          // TODO: replace with real characterization data
-          { Units.inchesToMeters(120), 0.54 },
-          { Units.inchesToMeters(160), 0.58 },
-          { Units.inchesToMeters(183), 0.58 },
-          { Units.inchesToMeters(206), 0.80 },
+      public static final class ShooterRpmMap {
+        public static final double[][] kDistanceRpmTable = {
+          // { distance (m), shooter RPM } — must be sorted ascending by distance
+          { Units.inchesToMeters(76),  3000.0 },
+          { Units.inchesToMeters(120), 3200.0 },
+          { Units.inchesToMeters(212), 4000.0 },
         };
       }
 
       public static final class TurretTracking {
         // Proportional gain: output power per degree of TX error (vision tracking)
         public static final double kP = 0.02;
-        // Proportional gain: output power per degree of angle error (pose tracking)
-        public static final double kPoseP = SmartDashboard.getNumber("Pose Tracking Gain", 0.008);
+        // Default proportional gain for pose tracking (degrees of error → motor power).
+        // Tunable at runtime via SmartDashboard key "Pose Tracking Gain".
+        private static final double kPosePDefault = 0.008;
+        public static double getPoseP() {
+          return SmartDashboard.getNumber("Pose Tracking Gain", kPosePDefault);
+        }
         // Turret stops correcting when error is within this many degrees
         public static final double kDeadband = 0.5;
         // Maximum output power allowed during tracking

@@ -19,6 +19,12 @@ public class VisionSubsystem extends SubsystemBase {
 
     private final NetworkTable m_limelightTable;
 
+    // Cached once per loop so getRobotPose() and getPoseTimestamp() always
+    // read from the same Limelight frame, eliminating the race condition where
+    // a new NT update between two getDoubleArray() calls would pair a pose from
+    // frame N with a timestamp from frame N+1.
+    private double[] m_cachedBotpose = new double[0];
+
     public enum LEDMode {
         kPipeline(0), kOff(1), kBlink(2), kOn(3);
 
@@ -166,10 +172,7 @@ public class VisionSubsystem extends SubsystemBase {
     // ---------------------------------------------------------------------------
 
     private double[] getAllianceBotPoseArray() {
-        // Always use blue-origin coordinates so that the pose matches the
-        // field positions defined in Constants (hub centers, etc.).
-        // Alliance only controls *which* hub to target, not the coordinate frame.
-        return m_limelightTable.getEntry("botpose_wpiblue").getDoubleArray(new double[0]);
+        return m_cachedBotpose;
     }
 
     // ---------------------------------------------------------------------------
@@ -178,6 +181,11 @@ public class VisionSubsystem extends SubsystemBase {
 
     @Override
     public void periodic() {
+        // Snapshot the full botpose array once so every accessor this loop reads
+        // from the same Limelight frame (pose + timestamp stay in sync).
+        m_cachedBotpose = m_limelightTable.getEntry("botpose_orb_wpiblue")
+                .getDoubleArray(new double[0]);
+
         // System.out.println("Vision/TX: " + getTX());
         SmartDashboard.putBoolean("Vision/HasTarget", hasTarget());
         SmartDashboard.putNumber("Vision/TX", getTX());

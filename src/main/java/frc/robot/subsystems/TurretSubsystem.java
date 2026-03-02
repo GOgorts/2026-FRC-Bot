@@ -168,7 +168,9 @@ public class TurretSubsystem extends SubsystemBase {
         double fieldAngleDeg = Math.toDegrees(Math.atan2(dy, dx));
 
         double robotHeadingDeg = robotPose.getRotation().getDegrees();
-        double desiredAngleDeg = MathUtil.inputModulus(fieldAngleDeg - robotHeadingDeg, -180, 180);
+        // Add 180° because the camera is mounted on the back of the robot,
+        // so the turret must point rearward to face the target.
+        double desiredAngleDeg = MathUtil.inputModulus(fieldAngleDeg - robotHeadingDeg + 180.0, -180, 180);
 
         double error = MathUtil.inputModulus(desiredAngleDeg - getTurretAngleDeg(), -180, 180);
 
@@ -186,7 +188,7 @@ public class TurretSubsystem extends SubsystemBase {
         }
 
         double power = MathUtil.clamp(
-            error * TurretTracking.kPoseP,
+            error * TurretTracking.getPoseP(),
             -TurretTracking.kMaxPower,
             TurretTracking.kMaxPower);
 

@@ -202,8 +202,8 @@ public class RobotContainer {
                                 .whileTrue(m_ShooterSubsystem.reverseShooterCommand()
                                                 .alongWith(m_TurningSubsystem.reverseTurningCommand()));
 
-                m_operatorController.rightBumper().whileTrue(m_TurretSubsystem.posTurretCommand());
-                m_operatorController.leftBumper().whileTrue(m_TurretSubsystem.negTurretCommand());
+                m_operatorController.leftBumper().whileTrue(m_TurretSubsystem.posTurretCommand());
+                m_operatorController.rightBumper().whileTrue(m_TurretSubsystem.negTurretCommand());
                 m_operatorController.a().whileTrue(m_TurretSubsystem.trackTargetCommand());
                 m_operatorController.b().whileTrue(m_TurretSubsystem.poseTrackCommand());
 

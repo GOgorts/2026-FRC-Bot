@@ -89,6 +89,7 @@ public class DriveSubsystem extends SubsystemBase {
   public DriveSubsystem(VisionSubsystem vision) {
     m_vision = vision;
     SmartDashboard.putData("Field", m_field);
+    SmartDashboard.putData("Drive/Gyro", m_gyro);
 
     // Get the robot configuration from PathPlanner's GUI settings
     RobotConfig robotConfig = null;

@@ -60,7 +60,7 @@ public class TurningSubsystem extends SubsystemBase {
         public Command runTurningCommand(BooleanSupplier shooterReady) {
                 return Commands.waitUntil(shooterReady)
                                 .andThen(this.startEnd(
-                                                () -> this.setTurningPower(TurningSetpoints.kturnForawrd),
+                                                () -> this.setTurningPower(TurningSetpoints.kturnForward),
                                                 () -> this.setTurningPower(0.0)));
         }
 
@@ -70,7 +70,7 @@ public class TurningSubsystem extends SubsystemBase {
                                                 .andThen(
                                                                 this.startEnd(
                                                                                 () -> this.setTurningPower(
-                                                                                                TurningSetpoints.ktunReverse),
+                                                                                                TurningSetpoints.kturnReverse),
                                                                                 () -> this.setTurningPower(0.0))));
 
         }

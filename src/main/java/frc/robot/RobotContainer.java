@@ -109,9 +109,12 @@ public class RobotContainer {
                 // Set the hang arm to hold when not running
                 // m_hangSubsystem.setDefaultCommand(m_hangSubsystem.idleCommand());
 
-                NamedCommands.registerCommand("Shoot", m_ShooterSubsystem.runShooterAutomaticCommand().withTimeout(5));
+                NamedCommands.registerCommand("Shoot", m_ShooterSubsystem.runShooterAutomaticCommand().withTimeout(10));
                 NamedCommands.registerCommand("FeedShooter",
-                                m_TurningSubsystem.runTurningCommand(m_ShooterSubsystem::isShooterReady).withTimeout(5));
+                                m_TurningSubsystem.runTurningCommand(m_ShooterSubsystem::isShooterReady)
+                                                .withTimeout(7));
+                NamedCommands.registerCommand("Target", m_TurretSubsystem.trackTargetCommand().withTimeout(1));
+
                 // Register Named Commands for PathPlanner;
                 // NamedCommands.registerCommand("ElevatorLevel2",
                 // m_coralSubSystem.setSetpointCommand(Setpoint.kLevel2));
@@ -197,7 +200,8 @@ public class RobotContainer {
                 m_operatorController.rightTrigger(OIConstants.kTriggerButtonThreshold)
                                 .whileTrue(m_ShooterSubsystem.runShooterAutomaticCommand()
                                                 .alongWith(m_TurningSubsystem
-                                                                .runTurningCommand(m_ShooterSubsystem::isShooterReady)));
+                                                                .runTurningCommand(
+                                                                                m_ShooterSubsystem::isShooterReady)));
                 m_operatorController.leftTrigger(OIConstants.kTriggerButtonThreshold)
                                 .whileTrue(m_ShooterSubsystem.reverseShooterCommand()
                                                 .alongWith(m_TurningSubsystem.reverseTurningCommand()));

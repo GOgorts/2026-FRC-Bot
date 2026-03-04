@@ -236,6 +236,15 @@ public final class Constants {
     public static final double kFreeSpeedRpm = 5676;
   }
 
+  public static final class DiagnosticConstants {
+    /**
+     * Default drive wheel speed (RPM) used in per-wheel diagnostic mode.
+     * Adjustable at runtime via SmartDashboard key "Diagnostic/WheelRPM".
+     */
+    public static final double kDefaultDiagnosticWheelRpm = 500.0;
+    public static final String kWheelRpmKey = "Diagnostic/WheelRPM";
+  }
+
   /**
    * Alliance helper that allows a manual SmartDashboard override for the
    * alliance color. Useful when DriverStation.getAlliance() returns empty

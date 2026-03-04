@@ -207,6 +207,23 @@ public class RobotContainer {
                 m_operatorController.a().whileTrue(m_TurretSubsystem.trackTargetCommand());
                 m_operatorController.b().whileTrue(m_TurretSubsystem.poseTrackCommand());
 
+                /*
+                 * Diagnostic Mode — spin each drive wheel individually at the RPM set via
+                 * SmartDashboard key "Diagnostic/WheelRPM".  Press the same D-pad button
+                 * again to stop.  Only one wheel runs at a time (DriveSubsystem is a shared
+                 * resource, so scheduling a new diagnostic command cancels the previous one).
+                 *
+                 * D-Pad layout (driver controller):
+                 *   Up    → Front-Left  wheel
+                 *   Right → Front-Right wheel
+                 *   Down  → Rear-Right  wheel
+                 *   Left  → Rear-Left   wheel
+                 */
+                m_driverController.povUp().toggleOnTrue(m_robotDrive.diagFrontLeftCommand());
+                m_driverController.povRight().toggleOnTrue(m_robotDrive.diagFrontRightCommand());
+                m_driverController.povDown().toggleOnTrue(m_robotDrive.diagRearRightCommand());
+                m_driverController.povLeft().toggleOnTrue(m_robotDrive.diagRearLeftCommand());
+
                 // m_driverController.rightTrigger().onTrue(m_ShooterSubsystem.runTurningCommand());
                 // m_driverController.leftTrigger().onTrue(m_ShooterSubsystem.reverseTurningCommand());
                 // Right Bumper -> Run coral tube intake in reverse

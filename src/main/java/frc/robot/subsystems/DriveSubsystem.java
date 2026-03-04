@@ -31,7 +31,9 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.AutoConstants;
+import frc.robot.Constants.DiagnosticConstants;
 import frc.robot.Constants.DriveConstants;
+import frc.robot.Constants.ModuleConstants;
 
 public class DriveSubsystem extends SubsystemBase {
   // Create MAXSwerveModules
@@ -90,6 +92,12 @@ public class DriveSubsystem extends SubsystemBase {
     m_vision = vision;
     SmartDashboard.putData("Field", m_field);
     SmartDashboard.putData("Drive/Gyro", m_gyro);
+
+    // Publish diagnostic defaults so they appear as editable entries in Elastic
+    SmartDashboard.putNumber(DiagnosticConstants.kWheelRpmKey, DiagnosticConstants.kDefaultDiagnosticWheelRpm);
+    SmartDashboard.putString("Diagnostic/ActiveWheel", "None");
+    SmartDashboard.putNumber("Diagnostic/TargetRPM", 0);
+    SmartDashboard.putNumber("Diagnostic/TargetSpeedMs", 0);
 
     // Get the robot configuration from PathPlanner's GUI settings
     RobotConfig robotConfig = null;
@@ -376,5 +384,84 @@ public class DriveSubsystem extends SubsystemBase {
     states[2] = m_rearLeft.getState();
     states[3] = m_rearRight.getState();
     return states;
+  }
+
+  // =========================================================
+  // DIAGNOSTIC MODE — per-wheel spin at configurable RPM
+  // =========================================================
+
+  /**
+   * Converts a drive-motor RPM to the meters/second setpoint expected by
+   * {@link MAXSwerveModule#setDesiredState}.  The encoder velocity conversion
+   * factor already bakes in gear reduction and wheel circumference, so the
+   * closed-loop setpoint is in m/s rather than raw RPM.
+   *
+   * <p>Formula: v = (rpm / 60) * wheelCircumference / gearReduction
+   */
+  private static double rpmToMetersPerSecond(double rpm) {
+    return (rpm / 60.0) * ModuleConstants.kWheelCircumferenceMeters / ModuleConstants.kDrivingMotorReduction;
+  }
+
+  /**
+   * Spins a single drive wheel forward at the RPM currently set on
+   * SmartDashboard ("Diagnostic/WheelRPM") while holding all other wheels
+   * stationary.  The wheel angle is locked at 0° (forward).
+   *
+   * @param moduleIndex  0 = front-left, 1 = front-right, 2 = rear-left, 3 = rear-right
+   */
+  private void runSingleModuleDiagnostic(int moduleIndex) {
+    double rpm = SmartDashboard.getNumber(
+        DiagnosticConstants.kWheelRpmKey, DiagnosticConstants.kDefaultDiagnosticWheelRpm);
+    double speedMs = rpmToMetersPerSecond(rpm);
+
+    SwerveModuleState running = new SwerveModuleState(speedMs, Rotation2d.fromDegrees(0));
+    SwerveModuleState stopped = new SwerveModuleState(0, Rotation2d.fromDegrees(0));
+
+    m_frontLeft.setDesiredState(moduleIndex == 0 ? running : stopped);
+    m_frontRight.setDesiredState(moduleIndex == 1 ? running : stopped);
+    m_rearLeft.setDesiredState(moduleIndex == 2 ? running : stopped);
+    m_rearRight.setDesiredState(moduleIndex == 3 ? running : stopped);
+
+    SmartDashboard.putString("Diagnostic/ActiveWheel",
+        new String[]{"FrontLeft", "FrontRight", "RearLeft", "RearRight"}[moduleIndex]);
+    SmartDashboard.putNumber("Diagnostic/TargetRPM", rpm);
+    SmartDashboard.putNumber("Diagnostic/TargetSpeedMs", speedMs);
+  }
+
+  /** Stops all wheels and clears the active-wheel diagnostic indicator. */
+  private void stopAllModulesDiagnostic() {
+    SwerveModuleState stopped = new SwerveModuleState(0, Rotation2d.fromDegrees(0));
+    m_frontLeft.setDesiredState(stopped);
+    m_frontRight.setDesiredState(stopped);
+    m_rearLeft.setDesiredState(stopped);
+    m_rearRight.setDesiredState(stopped);
+    SmartDashboard.putString("Diagnostic/ActiveWheel", "None");
+  }
+
+  /**
+   * Returns a command that runs the front-left wheel at the diagnostic RPM
+   * (toggle on/off with the same button via {@code toggleOnTrue}).
+   */
+  public Command diagFrontLeftCommand() {
+    return this.startEnd(() -> runSingleModuleDiagnostic(0), this::stopAllModulesDiagnostic)
+        .withName("DiagFrontLeft");
+  }
+
+  /** @see #diagFrontLeftCommand() */
+  public Command diagFrontRightCommand() {
+    return this.startEnd(() -> runSingleModuleDiagnostic(1), this::stopAllModulesDiagnostic)
+        .withName("DiagFrontRight");
+  }
+
+  /** @see #diagFrontLeftCommand() */
+  public Command diagRearLeftCommand() {
+    return this.startEnd(() -> runSingleModuleDiagnostic(2), this::stopAllModulesDiagnostic)
+        .withName("DiagRearLeft");
+  }
+
+  /** @see #diagFrontLeftCommand() */
+  public Command diagRearRightCommand() {
+    return this.startEnd(() -> runSingleModuleDiagnostic(3), this::stopAllModulesDiagnostic)
+        .withName("DiagRearRight");
   }
 }

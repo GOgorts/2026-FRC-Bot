@@ -13,12 +13,6 @@
         {
           "type": "named",
           "data": {
-            "name": "Target"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
             "name": "FlipDown"
           }
         },

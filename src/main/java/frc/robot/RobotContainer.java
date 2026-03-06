@@ -201,11 +201,11 @@ public class RobotContainer {
                 m_driverController.rightTrigger().onTrue(m_IntakeSubsystem.flipUpCommand());
                 m_driverController.leftTrigger().onTrue(m_IntakeSubsystem.flipDownCommand());
 
-                m_operatorController.rightTrigger(OIConstants.kTriggerButtonThreshold)
-                                .whileTrue(m_ShooterSubsystem.runShooterAutomaticCommand()
+                m_operatorController.leftTrigger(OIConstants.kTriggerButtonThreshold)
+                                .whileTrue(m_ShooterSubsystem.runShooterCommand()
                                                 .alongWith(m_TurningSubsystem
                                                                 .runTurningCommand()));
-                m_operatorController.leftTrigger(OIConstants.kTriggerButtonThreshold)
+                m_operatorController.rightTrigger(OIConstants.kTriggerButtonThreshold)
                                 .whileTrue(m_ShooterSubsystem.reverseShooterCommand()
                                                 .alongWith(m_TurningSubsystem.reverseTurningCommand()));
 

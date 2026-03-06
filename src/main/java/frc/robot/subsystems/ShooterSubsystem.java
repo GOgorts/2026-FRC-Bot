@@ -47,7 +47,7 @@ public class ShooterSubsystem extends SubsystemBase {
 
                 SmartDashboard.putNumber(kForwardRpmKey, ShooterSubsystemConstants.kDefaultShooterRpm);
                 SmartDashboard.putNumber(kReverseRpmKey, ShooterSubsystemConstants.kDefaultReverseShooterRpm);
-                SmartDashboard.putBoolean(kManualModeKey, false);
+                SmartDashboard.putBoolean(kManualModeKey, true);
         }
 
         @Override
@@ -104,7 +104,7 @@ public class ShooterSubsystem extends SubsystemBase {
 
         /** Returns true when manual mode is enabled via the dashboard toggle. */
         public boolean isManualMode() {
-                return SmartDashboard.getBoolean(kManualModeKey, false);
+                return SmartDashboard.getBoolean(kManualModeKey, true);
         }
 
         /**
